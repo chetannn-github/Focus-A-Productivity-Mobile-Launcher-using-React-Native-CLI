@@ -1,6 +1,6 @@
 ## Todos
 
-1. Add homepage icons.
+1. Add homepage icons.  -- done
 2. Display essential apps.
 
 
