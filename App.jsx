@@ -1,7 +1,8 @@
-import { View, Text } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import AppsList from './Components/AppsList';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -15,8 +16,10 @@ function HomeScreen() {
 
 function AppDrawer() {
   return (
-    <View style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center', alignItems: 'center' }}>
-      <Text style={{ color: 'white' }}>App Drawer</Text>
+    <View style={{ flex: 1, backgroundColor: 'black' }}>
+      <ScrollView contentContainerStyle={{ paddingTop: 20, paddingHorizontal: 10 }}>
+        <AppsList /> 
+      </ScrollView>
     </View>
   );
 }
