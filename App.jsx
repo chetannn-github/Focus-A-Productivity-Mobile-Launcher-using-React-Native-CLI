@@ -1,4 +1,4 @@
-import { View, ScrollView, Button } from 'react-native';
+import { View, Text, ScrollView, Button } from 'react-native';
 import React from 'react';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -6,9 +6,11 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import AppsList from './Components/AppsList';
 import Progress from './Components/Progress';
+import Sidebar from './Components/Sidebar';
 
 const Tab = createMaterialTopTabNavigator();
 const Drawer = createDrawerNavigator();
+
 
 
 function HomeScreen() {
@@ -16,14 +18,13 @@ function HomeScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: 'black', padding: 20 }}>
-      
       <Progress />
       <Button title="Open Drawer" onPress={() => navigation.openDrawer()} />
     </View>
   );
 }
 
-function AppDrawer() {
+function AllApps() {
   return (
     <View style={{ flex: 1, backgroundColor: 'black' }}>
       <ScrollView contentContainerStyle={{ paddingTop: 20, paddingHorizontal: 10 }}>
@@ -33,20 +34,19 @@ function AppDrawer() {
   );
 }
 
-
 function MyTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
         tabBarStyle: { backgroundColor: 'black', height: 0 },
-        tabBarIndicatorStyle: { backgroundColor: 'transparent' }, // Hide slider
+        tabBarIndicatorStyle: { backgroundColor: 'transparent' },
         tabBarActiveTintColor: 'white',
         tabBarInactiveTintColor: 'gray',
-        tabBarShowLabel: false, 
+        tabBarShowLabel: false,
       }}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: () => null }} />
-      <Tab.Screen name="Apps" component={AppDrawer} options={{ tabBarLabel: () => null }} />
+      <Tab.Screen name="Apps" component={AllApps} options={{ tabBarLabel: () => null }} />
     </Tab.Navigator>
   );
 }
@@ -57,17 +57,17 @@ function MyDrawer() {
       screenOptions={{
         headerShown: false,
         drawerStyle: {
-          backgroundColor: 'black', 
+          backgroundColor: 'black',
           width: '100%',
         },
-        drawerType: 'front', 
+        drawerType: 'front',
       }}
+      drawerContent={() => <Sidebar />}  // This will render Sidebar as the content of the drawer
     >
       <Drawer.Screen name="Launcher" component={MyTabs} />
     </Drawer.Navigator>
   );
 }
-
 
 const App = () => {
   return (
