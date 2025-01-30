@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Linking } from 'react-native';
 import { black } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 
 function Sidebar() {
   const [collapsed, setCollapsed] = useState([false, false, false, false]);
-
+  const openLink = (url) => {
+    Linking.openURL(url);
+  };
   const toggleCollapse = (index) => {
     const updatedCollapsed = [...collapsed];
     updatedCollapsed[index] = !updatedCollapsed[index];
@@ -27,8 +29,8 @@ function Sidebar() {
 
       {/* Links */}
       <View style={styles.linksContainer}>
-        <Text style={styles.link}>LinkedIn</Text>
-        <Text style={styles.link}>GitHub</Text>
+        <Text style={styles.link} onPress={() => openLink('https://www.linkedin.com/in/chetannn/')} >LinkedIn</Text>
+        <Text style={styles.link}  onPress={() => openLink('https://github.com/chetannn-github/')}>GitHub</Text>
       </View>
     </View>
   );
