@@ -16,32 +16,34 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     fun getInstalledApps(promise: Promise) {
         try {
-            val pm: PackageManager = reactApplicationContext.packageManager
-            val packages: List<PackageInfo> = pm.getInstalledPackages(PackageManager.GET_META_DATA)
-            val apps = WritableNativeArray()
+        val pm: PackageManager = reactApplicationContext.packageManager
+        val packages: List<PackageInfo> = pm.getInstalledPackages(0)
+        val apps = WritableNativeArray()
 
-            for (packageInfo in packages) {
-                // Safely get applicationInfo using the safe call operator
-                val applicationInfo = packageInfo.applicationInfo
+        for (packageInfo in packages) {
+            packageInfo.applicationInfo?.let { appInfo ->
+                val launchIntent = pm.getLaunchIntentForPackage(packageInfo.packageName)
 
-                // Check if applicationInfo is not null and handle accordingly
-                if (applicationInfo != null && applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0) {
-                    val appInfo = WritableNativeMap()
-                    // Safely access appLabel
-                    val appLabel = pm.getApplicationLabel(applicationInfo).toString()
-                    appInfo.putString("appName", appLabel)
-                    appInfo.putString("packageName", packageInfo.packageName)
-                    appInfo.putString("version", packageInfo.versionName ?: "N/A")
-                    apps.pushMap(appInfo)
+                // App sirf tab add karo jab ye launcher me visible ho
+                if (launchIntent != null) {
+                    val appData = WritableNativeMap().apply {
+                        putString("appName", pm.getApplicationLabel(appInfo).toString())
+                        putString("packageName", packageInfo.packageName)
+                        putString("version", packageInfo.versionName ?: "N/A")
+                        putBoolean("isSystemApp", (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0)
+                    }
+                    apps.pushMap(appData)
                 }
             }
+        }
 
-            promise.resolve(apps)
+        promise.resolve(apps)
         } catch (e: Exception) {
-            promise.reject("ERROR", e)
+            promise.reject("GET_APPS_ERROR", "Failed to retrieve installed apps: ${e.message}", e)
         }
     }
 
+    
     @ReactMethod
     fun openApp(packageName: String, promise: Promise) {
         try {
