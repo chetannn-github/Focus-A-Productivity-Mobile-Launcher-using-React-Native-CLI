@@ -1,27 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableWithoutFeedback, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableWithoutFeedback, StyleSheet, ActivityIndicator } from 'react-native';
 import { NativeModules } from 'react-native';
 
 const { InstalledApps } = NativeModules;
 
 const AppsList = () => {
   const [apps, setApps] = useState([]); // State to store the apps list
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Get the installed apps when the component mounts
+  const fetchApps = () => {
     InstalledApps.getInstalledApps()
       .then((apps) => {
         setApps(apps); 
+        setLoading(false);
       })
       .catch((error) => {
         console.error('Error fetching installed apps: ', error);
+        setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchApps(); // Initial fetch
+
+    // Polling every 5 seconds
+    const intervalId = setInterval(fetchApps, 5000);
+
+    return () => clearInterval(intervalId); // Cleanup interval on unmount
   }, []);
 
   const openApp = (packageName) => {
     InstalledApps.openApp(packageName)
-      .then((response) => {
-        console.log(response); // Successfully opened app
+      .then(() => {
+        console.log(`Opened: ${packageName}`); // Successfully opened app
       })
       .catch((error) => {
         console.error('Error opening app: ', error);
@@ -30,7 +41,9 @@ const AppsList = () => {
 
   return (
     <View style={styles.container}>
-      {apps.length > 0 ? (
+      {loading ? (
+        <ActivityIndicator size="large" color="white" />
+      ) : apps.length > 0 ? (
         <FlatList
           data={apps}
           keyExtractor={(item) => item.packageName}
