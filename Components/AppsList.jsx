@@ -7,20 +7,15 @@ const { InstalledApps } = NativeModules;
 
 const AppsList = () => {
   const { showAppIcons, shuffleApps } = useContext(SettingsContext);
-  const [apps, setApps] = useState([]); // State to store the apps list
+  const [apps, setApps] = useState([]);
+  const [originalApps, setOriginalApps] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchApps = async () => {
     try {
       const apps = await InstalledApps.getInstalledApps();
-      let sortedApps = apps;
-
-      if (!shuffleApps) {
-        // Sorting apps alphabetically by appName, ignoring case
-        sortedApps = apps.sort((a, b) => a.appName.toLowerCase().localeCompare(b.appName.toLowerCase()));
-      }
-
-      setApps(sortedApps);
+      setOriginalApps(apps);
+      updateAppsList(apps);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching installed apps: ', error);
@@ -28,19 +23,28 @@ const AppsList = () => {
     }
   };
 
+  const updateAppsList = (appList) => {
+    let updatedApps = appList;
+    if (!shuffleApps) {
+      updatedApps = [...appList].sort((a, b) => a.appName.toLowerCase().localeCompare(b.appName.toLowerCase()));
+    } else {
+      updatedApps = [...appList].sort(() => Math.random() - 0.5);
+    }
+    setApps(updatedApps);
+  };
+
   useEffect(() => {
-    fetchApps(); // Initial fetch
+    fetchApps();
+  }, []);
 
-    // Polling every 5 seconds
-    // const intervalId = setInterval(fetchApps, 5000);
-
-    // return () => clearInterval(intervalId); // Cleanup interval on unmount
-  },[]);
+  useEffect(() => {
+    updateAppsList(originalApps);
+  }, [shuffleApps]);
 
   const openApp = (packageName) => {
     InstalledApps.openApp(packageName)
       .then(() => {
-        console.log(`Opened: ${packageName}`); // Successfully opened app
+        console.log(`Opened: ${packageName}`);
       })
       .catch((error) => {
         console.error('Error opening app: ', error);
@@ -54,15 +58,13 @@ const AppsList = () => {
       ) : apps.length > 0 ? (
         <FlatList
           data={apps}
-          bouncesZoom={true}
-          bounces={true}
           keyExtractor={(item) => item.packageName}
           renderItem={({ item }) => (
             <TouchableWithoutFeedback onPress={() => openApp(item.packageName)}>
               <View style={styles.appItem}>
                 {showAppIcons && item.icon && (
                   <Image
-                    source={{ uri: item.icon && item.icon !== "" ? `data:image/png;base64,${item.icon}` : "https://picsum.photos/200" }} 
+                    source={{ uri: item.icon ? `data:image/png;base64,${item.icon}` : "https://picsum.photos/200" }} 
                     style={styles.appIcon}
                     resizeMode="contain"
                   />
@@ -87,16 +89,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     marginTop: 10,
   },
-  switchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  switchText: {
-    color: 'white',
-    fontSize: 16,
-  },
   appItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -107,7 +99,6 @@ const styles = StyleSheet.create({
     width: 25,
     height: 27,
     marginRight: 10,
-    
   },
   appName: {
     color: 'white',
