@@ -16,8 +16,8 @@ const AppsList = () => {
       let sortedApps = apps;
 
       if (!shuffleApps) {
-        // Sorting apps alphabetically by appName
-        sortedApps = apps.sort((a, b) => a.appName.localeCompare(b.appName));
+        // Sorting apps alphabetically by appName, ignoring case
+        sortedApps = apps.sort((a, b) => a.appName.toLowerCase().localeCompare(b.appName.toLowerCase()));
       }
 
       setApps(sortedApps);
