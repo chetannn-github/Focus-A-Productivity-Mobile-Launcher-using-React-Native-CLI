@@ -68,7 +68,18 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) :
                     drawable.draw(canvas)
                     bitmap
                 }
-                else -> throw IllegalArgumentException("Unsupported drawable type")
+                else -> {
+                    // Handle unsupported drawable types
+                    val bitmap = Bitmap.createBitmap(
+                        drawable.intrinsicWidth,
+                        drawable.intrinsicHeight,
+                        Bitmap.Config.ARGB_8888
+                    )
+                    val canvas = Canvas(bitmap)
+                    drawable.setBounds(0, 0, canvas.width, canvas.height)
+                    drawable.draw(canvas)
+                    bitmap
+                }
             }
             val outputStream = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
