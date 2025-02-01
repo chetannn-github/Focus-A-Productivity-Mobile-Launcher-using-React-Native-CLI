@@ -88,21 +88,27 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 25,
     marginTop: 10,
+    paddingBottom: 25,
   },
   appItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    
     paddingVertical: 10,
     marginBottom: 4,
+    width: '100%',
   },
   appIcon: {
-    width: 25,
+    width: 27,
     height: 27,
     marginRight: 10,
+    // borderRadius:60,
+    
   },
   appName: {
     color: 'white',
     fontSize: 15,
+    opacity: 0.9,
   },
   noApps: {
     color: 'white',
