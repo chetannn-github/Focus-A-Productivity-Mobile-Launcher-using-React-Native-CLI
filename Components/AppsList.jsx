@@ -45,10 +45,10 @@ const AppsList = () => {
   return (
     <View style={styles.container}>
       {/* Toggle Switch to Show/Hide Icons */}
-      <View style={styles.switchContainer}>
+      {/* <View style={styles.switchContainer}>
         <Text style={styles.switchText}>Show Icons</Text>
         <Switch value={showIcons} onValueChange={setShowIcons} />
-      </View>
+      </View> */}
 
       {loading ? (
         <ActivityIndicator size="large" color="white" />
@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     paddingTop: 20,
     paddingHorizontal: 25,
+    marginTop: 10,
   },
   switchContainer: {
     flexDirection: 'row',
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-    marginBottom: 130,
+    marginBottom: 9,
     
   },
   appIcon: {
