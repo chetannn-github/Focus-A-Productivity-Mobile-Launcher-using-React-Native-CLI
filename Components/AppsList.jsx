@@ -11,7 +11,9 @@ const AppsList = () => {
   const fetchApps = () => {
     InstalledApps.getInstalledApps()
       .then((apps) => {
-        setApps(apps); 
+        // Sorting apps alphabetically by appName
+        const sortedApps = apps.sort((a, b) => a.appName.localeCompare(b.appName));
+        setApps(sortedApps); 
         setLoading(false);
       })
       .catch((error) => {
