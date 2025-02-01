@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, FlatList, TouchableWithoutFeedback, StyleSheet, ActivityIndicator, Image } from 'react-native';
+import { View, Text, FlatList, TouchableWithoutFeedback, StyleSheet, ActivityIndicator, Image, NativeEventEmitter, NativeModules } from 'react-native';
 import { SettingsContext } from '../Context/SettingsContext';
-import { NativeModules } from 'react-native';
 
 const { InstalledApps } = NativeModules;
+const installedAppsEmitter = new NativeEventEmitter(InstalledApps);
 
 const AppsList = () => {
   const { showAppIcons, shuffleApps } = useContext(SettingsContext);
@@ -24,17 +24,24 @@ const AppsList = () => {
   };
 
   const updateAppsList = (appList) => {
-    let updatedApps = appList;
+    let updatedApps = [...appList];
     if (!shuffleApps) {
-      updatedApps = [...appList].sort((a, b) => a.appName.toLowerCase().localeCompare(b.appName.toLowerCase()));
+      updatedApps.sort((a, b) => a.appName.toLowerCase().localeCompare(b.appName.toLowerCase()));
     } else {
-      updatedApps = [...appList].sort(() => Math.random() - 0.5);
+      updatedApps.sort(() => Math.random() - 0.5);
     }
     setApps(updatedApps);
   };
 
   useEffect(() => {
     fetchApps();
+
+    // Event Listener for App Install/Uninstall
+    const subscription = installedAppsEmitter.addListener('appListUpdated', () => {
+      fetchApps();
+    });
+
+    return () => subscription.remove();
   }, []);
 
   useEffect(() => {
@@ -88,27 +95,21 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 25,
     marginTop: 10,
-    paddingBottom: 25,
   },
   appItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    
     paddingVertical: 10,
     marginBottom: 4,
-    width: '100%',
   },
   appIcon: {
-    width: 27,
+    width: 25,
     height: 27,
     marginRight: 10,
-    // borderRadius:60,
-    
   },
   appName: {
     color: 'white',
     fontSize: 15,
-    opacity: 0.9,
   },
   noApps: {
     color: 'white',
