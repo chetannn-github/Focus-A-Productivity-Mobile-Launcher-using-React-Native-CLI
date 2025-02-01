@@ -1,6 +1,5 @@
 ## Todos
-1. Fix app drawer UX.
-2. Add Options to each app in app drawer (like hide, rename, appinfo , uninstall etc .)
+1. Add Options to each app in app drawer (like hide, rename, appinfo , uninstall etc .)
 
 
 
