@@ -1,7 +1,6 @@
 ## Todos
 1. Fix app drawer UX.
-2. Display Icons.
-3. Add Options to each app in app drawer (like hide, rename, appinfo , uninstall etc .)
+2. Add Options to each app in app drawer (like hide, rename, appinfo , uninstall etc .)
 
 
 
