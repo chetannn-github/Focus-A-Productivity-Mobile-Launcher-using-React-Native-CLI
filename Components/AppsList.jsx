@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableWithoutFeedback, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableWithoutFeedback, StyleSheet, ActivityIndicator, Image, Switch } from 'react-native';
 import { NativeModules } from 'react-native';
 
 const { InstalledApps } = NativeModules;
@@ -7,13 +7,14 @@ const { InstalledApps } = NativeModules;
 const AppsList = () => {
   const [apps, setApps] = useState([]); // State to store the apps list
   const [loading, setLoading] = useState(true);
+  const [showIcons, setShowIcons] = useState(true); // Toggle to show/hide icons
 
   const fetchApps = () => {
     InstalledApps.getInstalledApps()
       .then((apps) => {
         // Sorting apps alphabetically by appName
         const sortedApps = apps.sort((a, b) => a.appName.localeCompare(b.appName));
-        setApps(sortedApps); 
+        setApps(sortedApps);
         setLoading(false);
       })
       .catch((error) => {
@@ -43,6 +44,12 @@ const AppsList = () => {
 
   return (
     <View style={styles.container}>
+      {/* Toggle Switch to Show/Hide Icons */}
+      <View style={styles.switchContainer}>
+        <Text style={styles.switchText}>Show Icons</Text>
+        <Switch value={showIcons} onValueChange={setShowIcons} />
+      </View>
+
       {loading ? (
         <ActivityIndicator size="large" color="white" />
       ) : apps.length > 0 ? (
@@ -51,7 +58,16 @@ const AppsList = () => {
           keyExtractor={(item) => item.packageName}
           renderItem={({ item }) => (
             <TouchableWithoutFeedback onPress={() => openApp(item.packageName)}>
-              <Text style={styles.appName}>{item.appName}</Text>
+              <View style={styles.appItem}>
+                {showIcons  &&item.icon && (
+                  <Image
+                  source={{ uri: item.icon && item.icon !== "" ? `data:image/png;base64,${item.icon}` : "https://picsum.photos/200" }} 
+                    style={styles.appIcon}
+                    resizeMode="contain"
+                  />
+                )}
+                <Text style={styles.appName}>{item.appName}</Text>
+              </View>
             </TouchableWithoutFeedback>
           )}
         />
@@ -69,10 +85,30 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 25,
   },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  switchText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  appItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    
+  },
+  appIcon: {
+    width: 25,
+    height: 27,
+    marginRight: 10,
+  },
   appName: {
     color: 'white',
-    fontSize: 13,
-    marginBottom: 24, // Add spacing between app names
+    fontSize: 15,
   },
   noApps: {
     color: 'white',
