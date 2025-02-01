@@ -15,13 +15,7 @@ const AppsList = () => {
       const apps = await InstalledApps.getInstalledApps();
       let sortedApps = apps;
 
-      if (shuffleApps) {
-        // Shuffling apps randomly
-        for (let i = sortedApps.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [sortedApps[i], sortedApps[j]] = [sortedApps[j], sortedApps[i]];
-        }
-      } else {
+      if (!shuffleApps) {
         // Sorting apps alphabetically by appName, ignoring case
         sortedApps = apps.sort((a, b) => a.appName.toLowerCase().localeCompare(b.appName.toLowerCase()));
       }
@@ -41,7 +35,7 @@ const AppsList = () => {
     const intervalId = setInterval(fetchApps, 5000);
 
     return () => clearInterval(intervalId); // Cleanup interval on unmount
-  }, [shuffleApps, showAppIcons]);
+  }, );
 
   const openApp = (packageName) => {
     InstalledApps.openApp(packageName)
