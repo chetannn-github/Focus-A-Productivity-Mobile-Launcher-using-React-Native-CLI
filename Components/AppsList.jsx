@@ -55,6 +55,8 @@ const AppsList = () => {
       ) : apps.length > 0 ? (
         <FlatList
           data={apps}
+          bouncesZoom={true}
+          bounces={true}
           keyExtractor={(item) => item.packageName}
           renderItem={({ item }) => (
             <TouchableWithoutFeedback onPress={() => openApp(item.packageName)}>
@@ -99,6 +101,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
+    marginBottom: 130,
     
   },
   appIcon: {
