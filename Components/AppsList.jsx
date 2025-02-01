@@ -101,12 +101,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-    marginBottom: 9,
+    marginBottom: 4,
   },
   appIcon: {
     width: 25,
     height: 27,
     marginRight: 10,
+    
   },
   appName: {
     color: 'white',
