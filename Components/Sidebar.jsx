@@ -5,15 +5,20 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 
 function Sidebar() {
-  const { showAppIcons, shuffleApps, toggleAppIcons, toggleShuffleApps } = useContext(SettingsContext);
-  const [collapsed, setCollapsed] = useState(false);
+  const { showAppIcons, shuffleApps, toggleAppIcons, toggleShuffleApps, showLeetcodeStats, toggleLeetcodeStats } = useContext(SettingsContext);
+  const [appListCollapsed, setAppListCollapsed] = useState(false);
+  const [homeScreenSettingsCollapsed, setHomeScreenSettingsCollapsed] = useState(false);
 
   const openLink = (url) => {
     Linking.openURL(url);
   };
 
-  const toggleCollapse = () => {
-    setCollapsed(!collapsed);
+  const toggleAppListCollapse = () => {
+    setAppListCollapsed(!appListCollapsed);
+  };
+
+  const toggleHomeScreenSettingsCollapse = () => {
+    setHomeScreenSettingsCollapsed(!homeScreenSettingsCollapsed);
   };
 
   return (
@@ -22,17 +27,17 @@ function Sidebar() {
 
       {/* App List Section */}
       <View style={styles.collapsibleContainer}>
-        <TouchableWithoutFeedback onPress={toggleCollapse}>
+        <TouchableWithoutFeedback onPress={toggleAppListCollapse}>
           <View style={styles.collapsibleHeaderContainer}>
             <Text style={styles.collapsibleHeader}>App List</Text>
             <Icon
-              name={collapsed ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
+              name={appListCollapsed ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
               size={24}
               color="white"
             />
           </View>
         </TouchableWithoutFeedback>
-        {collapsed && (
+        {appListCollapsed && (
           <View style={styles.collapsedContent}>
             <View style={styles.switchContainer}>
               <Text style={styles.switchLabel}>Show App Icons</Text>
@@ -46,6 +51,31 @@ function Sidebar() {
               <Switch
                 value={shuffleApps}
                 onValueChange={toggleShuffleApps}
+              />
+            </View>
+          </View>
+        )}
+      </View>
+
+      {/* Home Screen Settings Section */}
+      <View style={styles.collapsibleContainer}>
+        <TouchableWithoutFeedback onPress={toggleHomeScreenSettingsCollapse}>
+          <View style={styles.collapsibleHeaderContainer}>
+            <Text style={styles.collapsibleHeader}>Home Screen Settings</Text>
+            <Icon
+              name={homeScreenSettingsCollapsed ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
+              size={24}
+              color="white"
+            />
+          </View>
+        </TouchableWithoutFeedback>
+        {homeScreenSettingsCollapsed && (
+          <View style={styles.collapsedContent}>
+            <View style={styles.switchContainer}>
+              <Text style={styles.switchLabel}>Leetcode Stats</Text>
+              <Switch
+                value={showLeetcodeStats}
+                onValueChange={toggleLeetcodeStats}
               />
             </View>
           </View>
