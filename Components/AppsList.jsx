@@ -32,10 +32,10 @@ const AppsList = () => {
     fetchApps(); // Initial fetch
 
     // Polling every 5 seconds
-    const intervalId = setInterval(fetchApps, 5000);
+    // const intervalId = setInterval(fetchApps, 5000);
 
-    return () => clearInterval(intervalId); // Cleanup interval on unmount
-  }, );
+    // return () => clearInterval(intervalId); // Cleanup interval on unmount
+  },[]);
 
   const openApp = (packageName) => {
     InstalledApps.openApp(packageName)
