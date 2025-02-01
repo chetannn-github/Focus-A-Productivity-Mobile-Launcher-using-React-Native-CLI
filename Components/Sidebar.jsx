@@ -1,46 +1,62 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableWithoutFeedback, Linking } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Linking, Switch } from 'react-native';
+import { SettingsContext } from '../Context/SettingsContext';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 
 function Sidebar() {
-  const [collapsed, setCollapsed] = useState([false, false, false, false]);
+  const { showAppIcons, shuffleApps, toggleAppIcons, toggleShuffleApps } = useContext(SettingsContext);
+  const [collapsed, setCollapsed] = useState(false);
+
   const openLink = (url) => {
     Linking.openURL(url);
   };
-  const toggleCollapse = (index) => {
-    const updatedCollapsed = [...collapsed];
-    updatedCollapsed[index] = !updatedCollapsed[index];
-    setCollapsed(updatedCollapsed);
+
+  const toggleCollapse = () => {
+    setCollapsed(!collapsed);
   };
 
   return (
     <View style={styles.sidebar}>
       <Text style={styles.header}>Launcher Settings</Text>
 
-      {/* Collapsible sections */}
-      {['Setting 1', 'Setting 2', 'Setting 3', 'Setting 4'].map((setting, index) => (
-        <View key={index} style={styles.collapsibleContainer}>
-          <TouchableWithoutFeedback onPress={() => toggleCollapse(index)}>
-            <View style={styles.collapsibleHeaderContainer}>
-              <Text style={styles.collapsibleHeader}>{setting}</Text>
-              <Icon
-                name={collapsed[index] ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
-                size={24}
-                color="white"
+      {/* App List Section */}
+      <View style={styles.collapsibleContainer}>
+        <TouchableWithoutFeedback onPress={toggleCollapse}>
+          <View style={styles.collapsibleHeaderContainer}>
+            <Text style={styles.collapsibleHeader}>App List</Text>
+            <Icon
+              name={collapsed ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
+              size={24}
+              color="white"
+            />
+          </View>
+        </TouchableWithoutFeedback>
+        {collapsed && (
+          <View style={styles.collapsedContent}>
+            <View style={styles.switchContainer}>
+              <Text style={styles.switchLabel}>Show App Icons</Text>
+              <Switch
+                value={showAppIcons}
+                onValueChange={toggleAppIcons}
               />
             </View>
-          </TouchableWithoutFeedback>
-          {collapsed[index] && <Text style={styles.collapsedContent}>Content for {setting}</Text>}
-        </View>
-      ))}
+            <View style={styles.switchContainer}>
+              <Text style={styles.switchLabel}>Shuffle Apps</Text>
+              <Switch
+                value={shuffleApps}
+                onValueChange={toggleShuffleApps}
+              />
+            </View>
+          </View>
+        )}
+      </View>
 
       {/* Links */}
       <View style={styles.linksContainer}>
         <Text style={styles.link} onPress={() => openLink('https://www.linkedin.com/in/chetannn/')}>
           LinkedIn 
           <IonIcon name="logo-linkedin" size={20} color="white" />
-          
         </Text>
         <Text style={styles.link} onPress={() => openLink('https://github.com/chetannn-github/')}>
           GitHub
@@ -84,11 +100,23 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(255, 255, 255, 0.1)', // low opacity border
   },
   collapsedContent: {
-    color: 'white',
-    padding: 10,
+    paddingLeft: 10,
+    paddingRight: 10,
+    paddingTop: 5,
+    paddingBottom: 5,
     backgroundColor: 'black',
     borderRadius: 5,
     marginTop: 5,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  switchLabel: {
+    color: 'white',
+    marginRight: 10,
   },
   linksContainer: {
     position: 'absolute',

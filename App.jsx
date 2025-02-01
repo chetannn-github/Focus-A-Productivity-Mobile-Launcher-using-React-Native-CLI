@@ -1,20 +1,16 @@
-import { View, ScrollView} from 'react-native';
 import React from 'react';
-import { NavigationContainer} from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { SettingsProvider } from './Context/SettingsContext';
 
 import AppsList from './Components/AppsList';
-
 import Sidebar from './Components/Sidebar';
 import { HomeScreen } from './Screens/HomeScreen';
+import { ScrollView, View } from 'react-native';
 
 const Tab = createMaterialTopTabNavigator();
 const Drawer = createDrawerNavigator();
-
-
-
-
 
 function AllApps() {
   return (
@@ -54,7 +50,7 @@ function MyDrawer() {
         },
         drawerType: 'front',
       }}
-      drawerContent={() => <Sidebar />}  // This will render Sidebar as the content of the drawer
+      drawerContent={() => <Sidebar />}
     >
       <Drawer.Screen name="Launcher" component={MyTabs} />
     </Drawer.Navigator>
@@ -63,9 +59,11 @@ function MyDrawer() {
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <MyDrawer />
-    </NavigationContainer>
+    <SettingsProvider>
+      <NavigationContainer>
+        <MyDrawer />
+      </NavigationContainer>
+    </SettingsProvider>
   );
 };
 

@@ -1,26 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableWithoutFeedback, StyleSheet, ActivityIndicator, Image, Switch } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, Text, FlatList, TouchableWithoutFeedback, StyleSheet, ActivityIndicator, Image } from 'react-native';
+import { SettingsContext } from '../Context/SettingsContext';
 import { NativeModules } from 'react-native';
 
 const { InstalledApps } = NativeModules;
 
 const AppsList = () => {
+  const { showAppIcons, shuffleApps } = useContext(SettingsContext);
   const [apps, setApps] = useState([]); // State to store the apps list
   const [loading, setLoading] = useState(true);
-  const [showIcons, setShowIcons] = useState(true); // Toggle to show/hide icons
 
-  const fetchApps = () => {
-    InstalledApps.getInstalledApps()
-      .then((apps) => {
+  const fetchApps = async () => {
+    try {
+      const apps = await InstalledApps.getInstalledApps();
+      let sortedApps = apps;
+
+      if (!shuffleApps) {
         // Sorting apps alphabetically by appName
-        const sortedApps = apps.sort((a, b) => a.appName.localeCompare(b.appName));
-        setApps(sortedApps);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error fetching installed apps: ', error);
-        setLoading(false);
-      });
+        sortedApps = apps.sort((a, b) => a.appName.localeCompare(b.appName));
+      }
+
+      setApps(sortedApps);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching installed apps: ', error);
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -30,7 +35,7 @@ const AppsList = () => {
     const intervalId = setInterval(fetchApps, 5000);
 
     return () => clearInterval(intervalId); // Cleanup interval on unmount
-  }, []);
+  }, [shuffleApps, showAppIcons]);
 
   const openApp = (packageName) => {
     InstalledApps.openApp(packageName)
@@ -44,12 +49,6 @@ const AppsList = () => {
 
   return (
     <View style={styles.container}>
-      {/* Toggle Switch to Show/Hide Icons */}
-      {/* <View style={styles.switchContainer}>
-        <Text style={styles.switchText}>Show Icons</Text>
-        <Switch value={showIcons} onValueChange={setShowIcons} />
-      </View> */}
-
       {loading ? (
         <ActivityIndicator size="large" color="white" />
       ) : apps.length > 0 ? (
@@ -61,9 +60,9 @@ const AppsList = () => {
           renderItem={({ item }) => (
             <TouchableWithoutFeedback onPress={() => openApp(item.packageName)}>
               <View style={styles.appItem}>
-                {showIcons  &&item.icon && (
+                {showAppIcons && item.icon && (
                   <Image
-                  source={{ uri: item.icon && item.icon !== "" ? `data:image/png;base64,${item.icon}` : "https://picsum.photos/200" }} 
+                    source={{ uri: item.icon && item.icon !== "" ? `data:image/png;base64,${item.icon}` : "https://picsum.photos/200" }} 
                     style={styles.appIcon}
                     resizeMode="contain"
                   />
@@ -103,7 +102,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     marginBottom: 9,
-    
   },
   appIcon: {
     width: 25,
