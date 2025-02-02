@@ -1,38 +1,78 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
+import { SettingsContext } from '../Context/SettingsContext';
+// Import stylesheet
 
 const Progress = () => {
-  return (
-    
-      <View style={styles.progressContainer}> 
-      <Text style={styles.text}>Leetcode Rank: 23321</Text>
+  const { leetcodeUsername } = useContext(SettingsContext);
+  const [leetcodeData, setLeetcodeData] = useState(null);
 
-        <Text style={styles.text}>Easy: 30%</Text>
-        <ProgressBar progress={0.7} color="white" style={styles.progressBar} />
-        <Text style={styles.text}>Medium: 30%</Text>
-        <ProgressBar progress={0.3} color="white" style={styles.progressBar} />
-        <Text style={styles.text}>Hard: 30%</Text>
-        <ProgressBar progress={0.7} color="white" style={styles.progressBar} />
+  const fetchLeetcodeAPI = async () => {
+    try {
+      const response = await fetch(`https://leetcode-stats-api.herokuapp.com/${leetcodeUsername}`);
+      const data = await response.json();
+      setLeetcodeData(data);
+    } catch (error) {
+      console.error('Error fetching Leetcode data:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (leetcodeUsername) {
+      fetchLeetcodeAPI();
+    }
+  }, [leetcodeUsername]);
+
+  // Agar data abhi tak nahi aaya toh loading dikhayenge
+  if (!leetcodeData) {
+    return (
+      <View style={styles.progressContainer}>
+        <Text style={styles.text}>Loading...</Text>
       </View>
+    );
+  }
+
+  // Progress Calculation (Round Off)
+  const easyProgress = leetcodeData.totalEasy ? Math.round((leetcodeData.easySolved / leetcodeData.totalEasy) * 100) : 0;
+  const mediumProgress = leetcodeData.totalMedium ? Math.round((leetcodeData.mediumSolved / leetcodeData.totalMedium) * 100) : 0;
+  const hardProgress = leetcodeData.totalHard ? Math.round((leetcodeData.hardSolved / leetcodeData.totalHard) * 100) : 0;
+
+  return (
+    <View style={styles.progressContainer}>
+      <Text style={styles.text}>Leetcode Rank: {leetcodeData.ranking}</Text>
+
+      <Text style={styles.text}>Easy: {easyProgress}%</Text>
+      <ProgressBar progress={easyProgress / 100} color="white" style={styles.progressBar} />
+
+      <Text style={styles.text}>Medium: {mediumProgress}%</Text>
+      <ProgressBar progress={mediumProgress / 100} color="white" style={styles.progressBar} />
+
+      <Text style={styles.text}>Hard: {hardProgress}%</Text>
+      <ProgressBar progress={hardProgress / 100} color="white" style={styles.progressBar} />
+    </View>
   );
 };
 
+
+
+
+
 const styles = StyleSheet.create({
   progressContainer: {
-    width: '40%',
+    width: '47%',
     // backgroundColor: 'blue',
     padding:5,
   },
   progressBar: {
-    height: 8,
+    height: 9,
     backgroundColor: '#111114',
     marginBottom: 10,
   },
   text: {
-    fontSize: 12,
+    fontSize: 13,
     color: 'white',
-    marginBottom: 4,
+    marginBottom: 6,
   },
 });
 

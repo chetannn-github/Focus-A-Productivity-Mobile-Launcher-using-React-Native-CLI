@@ -1,13 +1,15 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, StyleSheet, TouchableWithoutFeedback, Linking, Switch } from 'react-native';
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Linking, Switch, TextInput, Button } from 'react-native';
 import { SettingsContext } from '../Context/SettingsContext';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 
 function Sidebar() {
-  const { showAppIcons, shuffleApps, toggleAppIcons, toggleShuffleApps, showLeetcodeStats, toggleLeetcodeStats } = useContext(SettingsContext);
-  const [appListCollapsed, setAppListCollapsed] = useState(false);
-  const [homeScreenSettingsCollapsed, setHomeScreenSettingsCollapsed] = useState(false);
+  const { showAppIcons, shuffleApps, toggleAppIcons, toggleShuffleApps, showLeetcodeStats, toggleLeetcodeStats, leetcodeUsername, changeLeetcodeUsername } = useContext(SettingsContext);
+  const [appListCollapsed, setAppListCollapsed] = useState(true);
+  const [homeScreenSettingsCollapsed, setHomeScreenSettingsCollapsed] = useState(true);
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [newUsername, setNewUsername] = useState(leetcodeUsername);
 
   const openLink = (url) => {
     Linking.openURL(url);
@@ -19,6 +21,11 @@ function Sidebar() {
 
   const toggleHomeScreenSettingsCollapse = () => {
     setHomeScreenSettingsCollapsed(!homeScreenSettingsCollapsed);
+  };
+
+  const handleUsernameChange = () => {
+    changeLeetcodeUsername(newUsername);
+    setEditingUsername(false);
   };
 
   return (
@@ -78,6 +85,27 @@ function Sidebar() {
                 onValueChange={toggleLeetcodeStats}
               />
             </View>
+            {showLeetcodeStats && (
+              <View>
+                {leetcodeUsername && !editingUsername && (
+                  <View>
+                    <Text style={styles.switchLabel}>Username: {leetcodeUsername}</Text>
+                    <Button title="Edit" onPress={() => setEditingUsername(true)} />
+                  </View>
+                ) }
+                {editingUsername && (
+                  <View>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter New Username"
+                      value={newUsername}
+                      onChangeText={setNewUsername}
+                    />
+                    <Button title="Save" onPress={handleUsernameChange} />
+                  </View>
+                )}
+              </View>
+            )}
           </View>
         )}
       </View>
@@ -147,6 +175,22 @@ const styles = StyleSheet.create({
   switchLabel: {
     color: 'white',
     marginRight: 10,
+  },
+  input: {
+    backgroundColor: 'white',
+    color: 'black',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  button: {
+    backgroundColor: 'blue',
+    color: 'white',
+    padding: 10,
+    borderRadius: 5,
+    textAlign: 'center',
+    marginTop: 10,
   },
   linksContainer: {
     position: 'absolute',
