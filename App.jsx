@@ -1,20 +1,22 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { SettingsProvider } from './Context/SettingsContext';
+import React ,{useContext} from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import { SettingsContext, SettingsProvider } from "./Context/SettingsContext";
 
-import AppsList from './Components/AppsList';
-import Sidebar from './Components/Sidebar';
-import { HomeScreen } from './Screens/HomeScreen';
-import { ScrollView, View } from 'react-native';
+
+import AppsList from "./Components/AppsList";
+import Sidebar from "./Components/Sidebar";
+import { HomeScreen } from "./Screens/HomeScreen";
+import { ScrollView, View } from "react-native";
+import LockScreen from "./Screens/LockScreen";
 
 const Tab = createMaterialTopTabNavigator();
 const Drawer = createDrawerNavigator();
 
 function AllApps() {
   return (
-    <View style={{ flex: 1, backgroundColor: 'black' }}>
+    <View style={{ flex: 1, backgroundColor: "black" }}>
       <ScrollView contentContainerStyle={{ paddingTop: 20, paddingHorizontal: 10 }}>
         <AppsList />
       </ScrollView>
@@ -26,10 +28,10 @@ function MyTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarStyle: { backgroundColor: 'black', height: 0 },
-        tabBarIndicatorStyle: { backgroundColor: 'transparent' },
-        tabBarActiveTintColor: 'white',
-        tabBarInactiveTintColor: 'gray',
+        tabBarStyle: { backgroundColor: "black", height: 0 },
+        tabBarIndicatorStyle: { backgroundColor: "transparent" },
+        tabBarActiveTintColor: "white",
+        tabBarInactiveTintColor: "gray",
         tabBarShowLabel: false,
       }}
     >
@@ -45,10 +47,10 @@ function MyDrawer() {
       screenOptions={{
         headerShown: false,
         drawerStyle: {
-          backgroundColor: 'black',
-          width: '100%',
+          backgroundColor: "black",
+          width: "100%",
         },
-        drawerType: 'front',
+        drawerType: "front",
       }}
       drawerContent={() => <Sidebar />}
     >
@@ -57,12 +59,20 @@ function MyDrawer() {
   );
 }
 
+const AppNavigator = () => {
+  const {lockedTime} = useContext(SettingsContext);
+
+  return lockedTime > 0 ? <LockScreen /> : <MyDrawer />;
+};
+
 const App = () => {
   return (
     <SettingsProvider>
-      <NavigationContainer>
-        <MyDrawer />
-      </NavigationContainer>
+      
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      
     </SettingsProvider>
   );
 };

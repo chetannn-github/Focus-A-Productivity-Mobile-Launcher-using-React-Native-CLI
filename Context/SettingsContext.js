@@ -8,6 +8,7 @@ export const SettingsProvider = ({ children }) => {
   const [shuffleApps, setShuffleApps] = useState(false);
   const [showLeetcodeStats, setShowLeetcodeStats] = useState(false);
   const [leetcodeUsername, setLeetcodeUsername] = useState(null);
+  const [lockedTime, setLockedTime] = useState(4);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -48,7 +49,7 @@ export const SettingsProvider = ({ children }) => {
   };
 
   return (
-    <SettingsContext.Provider value={{ showAppIcons, shuffleApps, showLeetcodeStats, toggleAppIcons, toggleShuffleApps, toggleLeetcodeStats, leetcodeUsername, changeLeetcodeUsername }}>
+    <SettingsContext.Provider value={{ showAppIcons, shuffleApps, showLeetcodeStats, toggleAppIcons, toggleShuffleApps, toggleLeetcodeStats, leetcodeUsername, changeLeetcodeUsername,lockedTime, setLockedTime }}>
       {children}
     </SettingsContext.Provider>
   );
