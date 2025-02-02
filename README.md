@@ -1,6 +1,6 @@
 ## Today's todos
 
-1. Time based Phone locking system.
+1. More rigrous time based locking system.
 
 
 
