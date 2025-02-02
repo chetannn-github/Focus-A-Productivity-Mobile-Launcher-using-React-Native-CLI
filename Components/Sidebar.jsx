@@ -87,9 +87,9 @@ function Sidebar() {
             </View>
             {showLeetcodeStats && (
               <View>
-                {leetcodeUsername && !editingUsername && (
+                {!editingUsername && (
                   <View>
-                    <Text style={styles.switchLabel}>Username: {leetcodeUsername}</Text>
+                    <Text style={styles.switchLabel}>Username: {leetcodeUsername ? leetcodeUsername : "not set"}</Text>
                     <Button title="Edit" onPress={() => setEditingUsername(true)} />
                   </View>
                 ) }
