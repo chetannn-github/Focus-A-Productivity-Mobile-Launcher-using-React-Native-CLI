@@ -12,5 +12,5 @@
 
 
 ## Next Version
-1.(Temp fixed by adding refresh control) Update live LeetCode data.(API polling but money problem!).
+1. (Temp fixed by adding refresh control) Update live LeetCode data.(API polling but money problem!).
 2. Leetcode torture.
