@@ -10,10 +10,11 @@
 ## Next Version
 1. (Temp fixed by adding refresh control) Update live LeetCode data (API polling but money problem!).
 2. Leetcode torture.
-
 <h2>Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI</h2>
-<img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/leetcode.png" width="30%" />
-<img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/lock.png" width="30%" />
-<img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/app%20drawer%202.png" width="30%" />
-<img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/app%20drawer.png" width="30%" />
-<img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/home.png" width="30%" />
+<p align="center">
+    <img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/leetcode.png" width="30%" />
+    <img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/lock.png" width="30%" />
+    <img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/app%20drawer%202.png" width="30%" />
+    <img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/app%20drawer.png" width="30%" />
+    <img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/home.png" width="30%" />
+</p>
