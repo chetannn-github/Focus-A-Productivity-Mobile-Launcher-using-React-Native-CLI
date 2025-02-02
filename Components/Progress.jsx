@@ -24,6 +24,9 @@ const Progress = () => {
     }
   }, [leetcodeUsername]);
 
+  if(leetcodeUsername === '' || leetcodeUsername === null) {
+    return;
+  }
   // Agar data abhi tak nahi aaya toh loading dikhayenge
   if (!leetcodeData) {
     return (
