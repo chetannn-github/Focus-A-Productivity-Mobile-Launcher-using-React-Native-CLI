@@ -8,7 +8,7 @@ export const SettingsProvider = ({ children }) => {
   const [shuffleApps, setShuffleApps] = useState(false);
   const [showLeetcodeStats, setShowLeetcodeStats] = useState(false);
   const [leetcodeUsername, setLeetcodeUsername] = useState(null);
-  const [lockedTime, setLockedTime] = useState(4);
+  const [lockedTime, setLockedTime] = useState(0);
 
   useEffect(() => {
     const loadSettings = async () => {

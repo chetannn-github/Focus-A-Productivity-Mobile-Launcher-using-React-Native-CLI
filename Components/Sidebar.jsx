@@ -122,6 +122,18 @@ function Sidebar() {
           </View>
         )}
       </View>
+
+
+      <View style={styles.linksContainer}>
+        <Text style={styles.link} onPress={() => openLink('https://www.linkedin.com/in/chetannn/')}>
+          LinkedIn 
+          <IonIcon name="logo-linkedin" size={20} color="white" />
+        </Text>
+        <Text style={styles.link} onPress={() => openLink('https://github.com/chetannn-github/')}>
+          GitHub
+          <IonIcon name="logo-github" size={20} color="white" />
+        </Text>
+      </View>
     </View>
   );
 }
@@ -136,6 +148,26 @@ const styles = StyleSheet.create({
   switchContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 },
   switchLabel: { color: 'white', marginRight: 10 },
   input: { backgroundColor: 'white', color: 'black', padding: 10, borderRadius: 5, marginTop: 10 },
+  linksContainer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: 'black',
+    padding: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  link: {
+    width: '48%',
+    backgroundColor: "black", // LinkedIn Blue
+    padding: 5,
+    borderRadius: 5,
+    textAlign: 'center',
+    color: 'white',
+    fontSize: 16,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',},
 });
 
 export default Sidebar;
