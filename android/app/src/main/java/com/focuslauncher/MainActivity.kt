@@ -1,4 +1,4 @@
-package com.focus
+package com.focuslauncher
 
 import android.content.Intent
 import android.os.Bundle

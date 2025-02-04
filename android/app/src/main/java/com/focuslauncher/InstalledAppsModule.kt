@@ -1,4 +1,4 @@
-package com.focus
+package com.focuslauncher
 
 import android.content.*
 import android.content.pm.PackageInfo

@@ -1,6 +1,6 @@
-package com.focus
+package com.focuslauncher
 
-import com.focus.InstalledAppsPackage
+import com.focuslauncher.InstalledAppsPackage
 
 import android.app.Application
 import com.facebook.react.PackageList

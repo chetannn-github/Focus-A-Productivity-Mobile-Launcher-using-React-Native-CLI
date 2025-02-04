@@ -1,5 +1,5 @@
-package com.focus
-import com.focus.InstalledAppsModule
+package com.focuslauncher
+import com.focuslauncher.InstalledAppsModule
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule
