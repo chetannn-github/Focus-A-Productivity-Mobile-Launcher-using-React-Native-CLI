@@ -1,4 +1,4 @@
-import React ,{useContext} from "react";
+import React ,{useContext, useEffect} from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
@@ -8,8 +8,9 @@ import { SettingsContext, SettingsProvider } from "./Context/SettingsContext";
 import AppsList from "./Components/AppsList";
 import Sidebar from "./Components/Sidebar";
 import { HomeScreen } from "./Screens/HomeScreen";
-import { ScrollView, View } from "react-native";
+import { ScrollView, StatusBar, View } from "react-native";
 import LockScreen from "./Screens/LockScreen";
+
 
 const Tab = createMaterialTopTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -66,9 +67,10 @@ const AppNavigator = () => {
 };
 
 const App = () => {
+  
   return (
     <SettingsProvider>
-      
+      <StatusBar backgroundColor="black" barStyle="light-content" />
         <NavigationContainer>
           <AppNavigator />
         </NavigationContainer>
