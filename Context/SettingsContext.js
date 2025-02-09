@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const SettingsContext = createContext();
 
 export const SettingsProvider = ({ children }) => {
-  const [showAppIcons, setShowAppIcons] = useState(false);
+  const [showAppIcons, setShowAppIcons] = useState(true);
   const [shuffleApps, setShuffleApps] = useState(false);
   const [showLeetcodeStats, setShowLeetcodeStats] = useState(false);
   const [leetcodeUsername, setLeetcodeUsername] = useState(null);
