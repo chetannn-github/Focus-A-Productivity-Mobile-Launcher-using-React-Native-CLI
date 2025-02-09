@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, FlatList, TouchableWithoutFeedback, StyleSheet, ActivityIndicator, Image, NativeEventEmitter, NativeModules } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Image, NativeEventEmitter, NativeModules, FlatList, Dimensions } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, useAnimatedScrollHandler, interpolate, withSpring } from 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SettingsContext } from '../Context/SettingsContext';
 
 const { InstalledApps } = NativeModules;
@@ -10,6 +12,9 @@ const AppsList = () => {
   const [apps, setApps] = useState([]);
   const [originalApps, setOriginalApps] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const scrollY = useSharedValue(0);
+  const screenHeight = Dimensions.get('window').height;
 
   const fetchApps = async () => {
     try {
@@ -35,12 +40,9 @@ const AppsList = () => {
 
   useEffect(() => {
     fetchApps();
-
-    // Event Listener for App Install/Uninstall
     const subscription = installedAppsEmitter.addListener('appListUpdated', () => {
       fetchApps();
     });
-
     return () => subscription.remove();
   }, []);
 
@@ -50,41 +52,58 @@ const AppsList = () => {
 
   const openApp = (packageName) => {
     InstalledApps.openApp(packageName)
-      .then(() => {
-        console.log(`Opened: ${packageName}`);
-      })
-      .catch((error) => {
-        console.error('Error opening app: ', error);
-      });
+      .then(() => console.log(`Opened: ${packageName}`))
+      .catch((error) => console.error('Error opening app: ', error));
   };
 
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
+  // 🏆 Elastic Bounce Effect on Scroll (Even When Not Scrollable)
+  const animatedStyle = useAnimatedStyle(() => {
+    const translateY = interpolate(scrollY.value, [-150, 0, 400], [-80, 0, 50]);
+    return {
+      transform: [{ translateY: withSpring(translateY, { damping: 1, stiffness: 0 }) }],
+    };
+  });
+
   return (
-    <View style={styles.container}>
-      {loading ? (
-        <ActivityIndicator size="large" color="white" />
-      ) : apps.length > 0 ? (
-        <FlatList
-          data={apps}
-          keyExtractor={(item) => item.packageName}
-          renderItem={({ item }) => (
-            <TouchableWithoutFeedback onPress={() => openApp(item.packageName)}>
-              <View style={styles.appItem}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        {loading ? (
+          <ActivityIndicator size="large" color="white" />
+        ) : apps.length > 0 ? (
+          <Animated.FlatList
+            data={apps}
+            keyExtractor={(item) => item.packageName}
+            renderItem={({ item }) => (
+              <View style={styles.appItem} onTouchEnd={() => openApp(item.packageName)}>
                 {showAppIcons && item.icon && (
                   <Image
-                    source={{ uri: item.icon ? `data:image/png;base64,${item.icon}` : "https://picsum.photos/200" }} 
+                    source={{ uri: item.icon ? `data:image/png;base64,${item.icon}` : "https://picsum.photos/200" }}
                     style={styles.appIcon}
                     resizeMode="contain"
                   />
                 )}
                 <Text style={styles.appName}>{item.appName}</Text>
               </View>
-            </TouchableWithoutFeedback>
-          )}
-        />
-      ) : (
-        <Text style={styles.noApps}>No apps found</Text>
-      )}
-    </View>
+            )}
+            onScroll={scrollHandler}
+            scrollEventThrottle={15}
+            contentContainerStyle={{
+              minHeight: screenHeight - 50, // Ensure it always fills screen height
+              paddingBottom: 20, // Extra space for bounce
+            }}
+            style={animatedStyle}
+          />
+        ) : (
+          <Text style={styles.noApps}>No apps found</Text>
+        )}
+      </View>
+    </GestureHandlerRootView>
   );
 };
 
@@ -95,12 +114,13 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 25,
     marginTop: 10,
+    
   },
   appItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-    marginBottom: 4,
+    marginBottom: 12,
   },
   appIcon: {
     width: 25,
