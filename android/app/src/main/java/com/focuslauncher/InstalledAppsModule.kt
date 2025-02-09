@@ -18,7 +18,7 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) :
 
     private val packageChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == Intent.ACTION_PACKAGE_ADDED || intent?.action == Intent.ACTION_PACKAGE_REMOVED) {
+            if (intent?.action == Intent.ACTION_PACKAGE_ADDED || intent?.action == Intent.ACTION_PACKAGE_REMOVED || intent?.action == Intent.ACTION_PACKAGE_CHANGED) {
                 sendAppListUpdateEvent()
             }
         }
@@ -28,6 +28,7 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) :
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_PACKAGE_ADDED)
             addAction(Intent.ACTION_PACKAGE_REMOVED)
+            addAction(Intent.ACTION_PACKAGE_CHANGED)
             addDataScheme("package")
         }
         reactContext.registerReceiver(packageChangeReceiver, filter)
@@ -113,17 +114,17 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun openApp(packageName: String, promise: Promise) {
-    try {
-        val launchIntent: Intent? = reactApplicationContext.packageManager.getLaunchIntentForPackage(packageName)
-        if (launchIntent != null) {
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            reactApplicationContext.startActivity(launchIntent)
-            promise.resolve("App Opened")
-        } else {
-            promise.reject("ERROR", "App not found")
+        try {
+            val launchIntent: Intent? = reactApplicationContext.packageManager.getLaunchIntentForPackage(packageName)
+            if (launchIntent != null) {
+                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                reactApplicationContext.startActivity(launchIntent)
+                promise.resolve("App Opened")
+            } else {
+                promise.reject("ERROR", "App not found")
+            }
+        } catch (e: Exception) {
+            promise.reject("ERROR", e)
         }
-    } catch (e: Exception) {
-        promise.reject("ERROR", e)
     }
-}
 }
