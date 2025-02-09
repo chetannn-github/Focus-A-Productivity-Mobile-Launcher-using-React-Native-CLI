@@ -1,5 +1,5 @@
 ## Fixes to be done.
-1. Status bar black.
+
 2. Add clock at home screen. 
 3. Time based  locking more rigrous.
 4. Add options to each app.(UNINSTALL, APP INFO,ETC)
