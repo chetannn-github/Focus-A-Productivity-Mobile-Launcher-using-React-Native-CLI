@@ -8,7 +8,6 @@
 7. Add wallpapers.
 8. add selected that can be used at the time of locking.
 9. user se install krne prr puche.
-10. when user disable any app then it should get remove from app list.
 
 
 
