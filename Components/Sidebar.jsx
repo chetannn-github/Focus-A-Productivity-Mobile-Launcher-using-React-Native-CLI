@@ -68,7 +68,7 @@ function Sidebar() {
       </View>
 
       {/* Home Screen Settings Section */}
-      <View style={styles.collapsibleContainer}>
+      {/* <View style={styles.collapsibleContainer}>
         <TouchableWithoutFeedback onPress={toggleHomeScreenSettingsCollapse}>
           <View style={styles.collapsibleHeaderContainer}>
             <Text style={styles.collapsibleHeader}>Home Screen Settings</Text>
@@ -98,7 +98,7 @@ function Sidebar() {
             )}
           </View>
         )}
-      </View>
+      </View> */}
 
       {/* Phone Lock Section */}
       <View style={styles.collapsibleContainer}>
