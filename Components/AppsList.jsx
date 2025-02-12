@@ -62,11 +62,11 @@ const AppsList = () => {
     },
   });
 
-  // 🏆 Elastic Bounce Effect on Scroll (Even When Not Scrollable)
+  
   const animatedStyle = useAnimatedStyle(() => {
     const translateY = interpolate(scrollY.value, [-150, 0, 400], [-80, 0, 50]);
     return {
-      transform: [{ translateY: withSpring(translateY, { damping: 1, stiffness: 0 }) }],
+      transform: [{ translateY: withSpring(translateY, { damping: 1, stiffness: 1 }) }],
     };
   });
 
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
-    marginBottom: 12,
+    marginBottom: 9,
   },
   appIcon: {
     width: 25,

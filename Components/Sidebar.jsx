@@ -1,8 +1,9 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableWithoutFeedback, Linking, Switch, TextInput, Button } from 'react-native';
 import { SettingsContext } from '../Context/SettingsContext';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
+import { useDrawerStatus } from '@react-navigation/drawer';
 
 function Sidebar() {
   const { showAppIcons, shuffleApps, toggleAppIcons, toggleShuffleApps, showLeetcodeStats, toggleLeetcodeStats, leetcodeUsername, changeLeetcodeUsername, lockedTime, setLockedTime } = useContext(SettingsContext);
@@ -12,6 +13,8 @@ function Sidebar() {
   const [editingUsername, setEditingUsername] = useState(false);
   const [newUsername, setNewUsername] = useState(leetcodeUsername);
   const [newLockedTime, setNewLockedTime] = useState(lockedTime.toString());
+
+  const drawerStatus = useDrawerStatus();
 
   const openLink = (url) => {
     Linking.openURL(url);
@@ -41,15 +44,26 @@ function Sidebar() {
     }
   };
 
+
+  useEffect(() => {
+    if (drawerStatus === 'closed') {
+      setAppListCollapsed(false);
+      setHomeScreenSettingsCollapsed(false);
+      setPhoneLockCollapsed(false);
+    }
+  },[drawerStatus]);
+
+  
+
   return (
     <View style={styles.sidebar}>
-      <Text style={styles.header}>Launcher Settings</Text>
+      <Text style={styles.header}>Focus Launcher</Text>
 
       {/* App List Section */}
       <View style={styles.collapsibleContainer}>
         <TouchableWithoutFeedback onPress={toggleAppListCollapse}>
           <View style={styles.collapsibleHeaderContainer}>
-            <Text style={styles.collapsibleHeader}>App List</Text>
+            <Text style={styles.collapsibleHeader}>App Drawer</Text>
             <Icon name={appListCollapsed ? 'keyboard-arrow-up' : 'keyboard-arrow-down'} size={24} color="white" />
           </View>
         </TouchableWithoutFeedback>
@@ -126,13 +140,14 @@ function Sidebar() {
 
       <View style={styles.linksContainer}>
         <Text style={styles.link} onPress={() => openLink('https://www.linkedin.com/in/chetannn/')}>
-          LinkedIn 
-          <IonIcon name="logo-linkedin" size={20} color="white" />
+          LinkedIn {""}
+          <IonIcon name="logo-linkedin" size={20} color="#0A66C2" />
         </Text>
         <Text style={styles.link} onPress={() => openLink('https://github.com/chetannn-github/')}>
-          GitHub
-          <IonIcon name="logo-github" size={20} color="white" />
+          GitHub {""}
+          <IonIcon name="logo-github"  size={20} color="red" />
         </Text>
+       
       </View>
     </View>
   );
@@ -156,6 +171,7 @@ const styles = StyleSheet.create({
     padding: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom:10
   },
   link: {
     width: '48%',
@@ -166,7 +182,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     flexDirection: 'row',
-    justifyContent: 'center',
+    
+    justifyContent: 'space-between',
     alignItems: 'center',},
 });
 

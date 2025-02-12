@@ -12,13 +12,13 @@ export function HomeScreen() {
     const navigation = useNavigation();
 
     const openPhoneApp = () => {
-        Linking.openURL('tel:');
+        Linking.sendIntent('android.intent.action.DIAL');
     };
 
     useEffect(() => { 
     let id = setInterval(() => {
         setQuote(()=>getRandomQuote());
-    },36000);
+    },106000);
 
     return () => clearInterval(id);
         
@@ -39,7 +39,7 @@ export function HomeScreen() {
             
             {/* {showLeetcodeStats && <Progress />} */}
 
-            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>
+            <Text style={{ color: 'white', fontSize: 20, fontWeight: 'medium',marginBottom:5 }}>
                 {formatTime(currentTime)}
                 
                 
