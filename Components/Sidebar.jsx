@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, StyleSheet,Image, TouchableWithoutFeedback, Linking, TextInput, Button, Pressable, ScrollView, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet,Image, TouchableWithoutFeedback, Linking, TextInput, Button, Pressable, ScrollView, SafeAreaView, FlatList, TouchableOpacity } from "react-native";
 import { SettingsContext } from "../Context/SettingsContext";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import IonIcon from "react-native-vector-icons/Ionicons";
@@ -148,20 +148,36 @@ function Sidebar() {
           </View>
         </TouchableWithoutFeedback>
         <Animated.View style={[styles.collapsedContent, wallpaperStyle]}>
-        <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 400 }}>
-  <View style={styles.wallpaperGrid}>
-    {Object.keys(wallpapers).map((key) => (
-      <Pressable key={key} onPress={() => changeWallpaper(key)} style={styles.wallpaperItem}>
-        <Image source={wallpapers[key]} style={styles.wallpaperImage} />
-        {selectedWallpaper === key && (
-          <View style={styles.tickOverlay}>
-            <IonIcon name="checkmark-circle" size={30} color="white" />
-          </View>
-        )}
-      </Pressable>
-    ))}
-  </View>
-        </ScrollView>
+        <FlatList
+  data={Object.keys(wallpapers)}
+  keyExtractor={(item) => item}
+  numColumns={2} // Grid format
+  showsVerticalScrollIndicator={false}
+  keyboardShouldPersistTaps="handled"
+  contentContainerStyle={{ flexGrow: 1, padding: 10 }}
+  renderItem={({ item }) => (
+    <View 
+      style={styles.wallpaperItem} 
+      onTouchEnd={() => {
+        console.log("Wallpaper changed:", item);
+        changeWallpaper(item);
+      }}
+    >
+      <Image 
+        source={wallpapers[item]} 
+        style={styles.wallpaperImage} 
+        pointerEvents="none" 
+      />
+      {selectedWallpaper === item && (
+        <View style={styles.tickOverlay}>
+          <IonIcon name="checkmark-circle" size={30} color="white" />
+        </View>
+      )}
+    </View>
+  )}
+/>
+
+
 </Animated.View>
 
       </View>
@@ -182,7 +198,7 @@ function Sidebar() {
 }
 
 const styles = StyleSheet.create({
-  sidebar: { flex: 1, alignItems: "center", backgroundColor: "black", padding: 20 },
+  sidebar: { flex: 1, alignItems: "center", backgroundColor: "black", paddingHorizontal: 20, paddingTop: 50 },
   header: { color: "white", fontSize: 22, marginBottom: 20 },
   collapsibleContainer: { width: "100%", marginBottom: 7 },
   collapsibleHeaderContainer: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
