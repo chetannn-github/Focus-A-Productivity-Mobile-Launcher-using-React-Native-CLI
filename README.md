@@ -1,10 +1,15 @@
+### today's todos.
+1. wallpapers
+2. time based locking more rigrous.
+
+
 ## Fixes to be done.
 
-2. Add clock at home screen. 
+2. Add clock at home screen. (done)
 3. Time based  locking more rigrous.
 4. Add options to each app.(UNINSTALL, APP INFO,ETC)
 5. Gesture hat jaa rhaa hh MI ke phones me.
-6. Improve UI of setting screen.
+6. Improve UI of setting screen. (done)
 7. Add wallpapers.
 8. add selected that can be used at the time of locking.
 9. user se install krne prr puche.
