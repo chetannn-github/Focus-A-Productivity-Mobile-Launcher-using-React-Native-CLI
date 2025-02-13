@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { View, Text, Linking, ImageBackground, StatusBar } from "react-native";
+import { View, Text, Linking, ImageBackground, StatusBar, SafeAreaView } from "react-native";
 import Progress from "../Components/Progress";
 import { useNavigation } from "@react-navigation/native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -18,7 +18,7 @@ export function HomeScreen() {
     const wallpaperURI = parseInt(selectedWallpaper) + 1;
     const wallpaperURIString = wallpapersObj["wallpaper"+wallpaperURI+""];
 
-    
+    // console.log(wallpaperURIString);
     
     
 
@@ -53,11 +53,12 @@ export function HomeScreen() {
     }, []);
 
     return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
         <ImageBackground 
   source={selectedWallpaper ? wallpaperURIString : require("../assets/wallpapers/wallpaper1.jpg")}  
   
 
-        style={{ flex:1, backgroundColor: 'black', padding: 25 ,flexDirection:"column",justifyContent:"flex-start",alignContent:"flex-start"}}>
+        style={{ flex:1, backgroundColor: 'black', paddingTop:50 ,paddingHorizontal:15,flexDirection:"column",justifyContent:"flex-start",alignContent:"flex-start"}}>
             
             {/* {showLeetcodeStats && <Progress />} */}
             <StatusBar 
@@ -79,5 +80,6 @@ export function HomeScreen() {
                 <Icon name="phone" size={30} color="white" onPress={openPhoneApp} />
             </View>
         </ImageBackground>
+        </SafeAreaView>
     );
 }
