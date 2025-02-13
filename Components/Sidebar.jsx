@@ -7,9 +7,10 @@ import { useDrawerStatus } from "@react-navigation/drawer";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
 
 function Sidebar() {
-  const { showAppIcons, toggleAppIcons, shuffleApps, toggleShuffleApps } = useContext(SettingsContext);
+  const { showAppIcons, toggleAppIcons, shuffleApps, toggleShuffleApps,lockedTime, setLockedTime } = useContext(SettingsContext);
   const [appListCollapsed, setAppListCollapsed] = useState(true);
   const [phoneLockCollapsed, setPhoneLockCollapsed] = useState(true);
+  const [newLockedTime, setNewLockedTime] = useState(lockedTime.toString());
   const drawerStatus = useDrawerStatus();
 
   // Shared values for animations
@@ -46,6 +47,13 @@ function Sidebar() {
   const togglePhoneLockCollapse = () => {
     setPhoneLockCollapsed(!phoneLockCollapsed);
     phoneLockHeight.value = phoneLockCollapsed ? 0 : 100;
+  };
+
+  const handleLockedTimeChange = () => {
+    const time = parseInt(newLockedTime, 10);
+    if (!isNaN(time) && time >= 0) {
+      setLockedTime(time);
+    }
   };
 
   useEffect(() => {
@@ -108,8 +116,9 @@ function Sidebar() {
         </TouchableWithoutFeedback>
         <Animated.View style={[styles.collapsedContent, phoneLockStyle]}>
           <Text style={styles.switchLabel}>Lock Duration (minutes):</Text>
-          <TextInput style={styles.input} keyboardType="numeric" placeholder="Enter time" />
-          <Button title="Set Lock Time" onPress={() => {}} />
+          <TextInput style={styles.input} keyboardType="numeric" placeholder="Enter time"  value={newLockedTime}
+              onChangeText={setNewLockedTime}/>
+          <Button title="Set Lock Time" onPress={handleLockedTimeChange} />
         </Animated.View>
       </View>
 
