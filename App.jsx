@@ -17,14 +17,11 @@ const Drawer = createDrawerNavigator();
 
 function AllApps() {
   return (
-    <View style={{ flex: 1, backgroundColor: "black" }}>
-      <ScrollView contentContainerStyle={{ paddingTop: 20, paddingHorizontal: 10 }}>
-        <AppsList />
-      </ScrollView>
+    <View style={{ flex: 1, backgroundColor: "black", paddingTop: 20, paddingHorizontal: 10 }}>
+      <AppsList />
     </View>
   );
 }
-
 function MyTabs() {
   return (
     <Tab.Navigator
