@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { View, Text, Linking } from "react-native";
+import { View, Text, Linking, ImageBackground, StatusBar } from "react-native";
 import Progress from "../Components/Progress";
 import { useNavigation } from "@react-navigation/native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -45,10 +45,16 @@ export function HomeScreen() {
     }, []);
 
     return (
-        <View style={{ flex:1, backgroundColor: 'black', padding: 25 ,flexDirection:"column",justifyContent:"flex-start",alignContent:"flex-start"}}>
+        <ImageBackground source={require('../assets/wallpapers/wallpaper31.jpg')}
+
+        style={{ flex:1, backgroundColor: 'black', padding: 25 ,flexDirection:"column",justifyContent:"flex-start",alignContent:"flex-start"}}>
             
             {/* {showLeetcodeStats && <Progress />} */}
-
+            <StatusBar 
+                barStyle="light-content" 
+                translucent={true} 
+                backgroundColor="transparent" 
+            />
             <Text style={{ color: 'white', fontSize: 20, fontWeight: 'medium',marginBottom:5 }}>
                 {formatTime(currentTime)}
                 
@@ -62,6 +68,6 @@ export function HomeScreen() {
                 <Icon name="more-horiz" size={30} color="white" onPress={() => navigation.openDrawer()} />
                 <Icon name="phone" size={30} color="white" onPress={openPhoneApp} />
             </View>
-        </View>
+        </ImageBackground>
     );
 }
