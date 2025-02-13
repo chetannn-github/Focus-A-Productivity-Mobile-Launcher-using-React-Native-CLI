@@ -15,6 +15,12 @@ export function HomeScreen() {
     const [quote, setQuote] = useState(getRandomQuote());
     const { showLeetcodeStats ,selectedWallpaper} = useContext(SettingsContext);
     const navigation = useNavigation();
+    const wallpaperURI = parseInt(selectedWallpaper) + 1;
+    const wallpaperURIString = wallpapersObj["wallpaper"+wallpaperURI+""];
+
+    
+    
+    
 
     const openPhoneApp = async () => {
         try {
@@ -48,7 +54,7 @@ export function HomeScreen() {
 
     return (
         <ImageBackground 
-  source={selectedWallpaper ? wallpapersObj[`wallpaper${selectedWallpaper}`] : require("../assets/wallpapers/wallpaper1.jpg")}  
+  source={selectedWallpaper ? wallpaperURIString : require("../assets/wallpapers/wallpaper1.jpg")}  
   
 
         style={{ flex:1, backgroundColor: 'black', padding: 25 ,flexDirection:"column",justifyContent:"flex-start",alignContent:"flex-start"}}>

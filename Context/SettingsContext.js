@@ -53,12 +53,14 @@ export const SettingsProvider = ({ children }) => {
 
   // Function to change and save wallpaper in local storage
   const changeWallpaper = async (wallpaperUri) => {
-   
-    const newValue = parseInt(wallpaperUri)+ 1;
-    const stringVal = newValue.toString();
-    console.log(stringVal);
-    setSelectedWallpaper(stringVal);
-    await AsyncStorage.setItem('selectedWallpaper', stringVal);
+    if(wallpaperUri === selectedWallpaper) return;
+    console.log("changing wallpapapers")
+    // const newValue = parseInt(wallpaperUri)+ 1;
+    // const stringVal = newValue.toString();
+    console.log(typeof(wallpaperUri));
+    
+    await AsyncStorage.setItem('selectedWallpaper', wallpaperUri);
+    setSelectedWallpaper(wallpaperUri);
   };
 
   return (
