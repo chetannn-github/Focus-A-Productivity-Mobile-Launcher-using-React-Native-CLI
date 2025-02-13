@@ -9,6 +9,7 @@ export const SettingsProvider = ({ children }) => {
   const [showLeetcodeStats, setShowLeetcodeStats] = useState(false);
   const [leetcodeUsername, setLeetcodeUsername] = useState(null);
   const [lockedTime, setLockedTime] = useState(0);
+  const [selectedWallpaper, setSelectedWallpaper] = useState(null);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -16,11 +17,13 @@ export const SettingsProvider = ({ children }) => {
       const storedShuffleApps = await AsyncStorage.getItem('shuffleApps') === 'true';
       const storedShowLeetcodeStats = await AsyncStorage.getItem('showLeetcodeStats') === 'true';
       const storedLeetcodeUsername = await AsyncStorage.getItem('leetcodeUsername');
+      const storedWallpaper = await AsyncStorage.getItem('selectedWallpaper'); // Load wallpaper
 
       setLeetcodeUsername(storedLeetcodeUsername);
       setShowAppIcons(storedShowAppIcons);
       setShuffleApps(storedShuffleApps);
       setShowLeetcodeStats(storedShowLeetcodeStats);
+      if (storedWallpaper) setSelectedWallpaper(storedWallpaper); // Set wallpaper if found
     };
     loadSettings();
   }, []);
@@ -48,8 +51,31 @@ export const SettingsProvider = ({ children }) => {
     await AsyncStorage.setItem('showLeetcodeStats', newValue.toString());
   };
 
+  // Function to change and save wallpaper in local storage
+  const changeWallpaper = async (wallpaperUri) => {
+   
+    const newValue = parseInt(wallpaperUri)+ 1;
+    const stringVal = newValue.toString();
+    console.log(stringVal);
+    setSelectedWallpaper(stringVal);
+    await AsyncStorage.setItem('selectedWallpaper', stringVal);
+  };
+
   return (
-    <SettingsContext.Provider value={{ showAppIcons, shuffleApps, showLeetcodeStats, toggleAppIcons, toggleShuffleApps, toggleLeetcodeStats, leetcodeUsername, changeLeetcodeUsername,lockedTime, setLockedTime }}>
+    <SettingsContext.Provider value={{
+      showAppIcons,
+      shuffleApps,
+      showLeetcodeStats,
+      toggleAppIcons,
+      toggleShuffleApps,
+      toggleLeetcodeStats,
+      leetcodeUsername,
+      changeLeetcodeUsername,
+      lockedTime,
+      setLockedTime,
+      selectedWallpaper,
+      changeWallpaper
+    }}>
       {children}
     </SettingsContext.Provider>
   );

@@ -6,12 +6,14 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SettingsContext } from "../Context/SettingsContext";
 import { formatTime, getRandomQuote } from "../Constants/functions";
 import { NativeModules } from 'react-native';
+import { wallpapers, wallpapersObj } from "../Constants/wallpapers";
 
 const { InstalledApps } = NativeModules;
 
 export function HomeScreen() {
+   
     const [quote, setQuote] = useState(getRandomQuote());
-    const { showLeetcodeStats } = useContext(SettingsContext);
+    const { showLeetcodeStats ,selectedWallpaper} = useContext(SettingsContext);
     const navigation = useNavigation();
 
     const openPhoneApp = async () => {
@@ -45,7 +47,9 @@ export function HomeScreen() {
     }, []);
 
     return (
-        <ImageBackground source={require('../assets/wallpapers/wallpaper31.jpg')}
+        <ImageBackground 
+  source={selectedWallpaper ? wallpapersObj[`wallpaper${selectedWallpaper}`] : require("../assets/wallpapers/wallpaper1.jpg")}  
+  
 
         style={{ flex:1, backgroundColor: 'black', padding: 25 ,flexDirection:"column",justifyContent:"flex-start",alignContent:"flex-start"}}>
             

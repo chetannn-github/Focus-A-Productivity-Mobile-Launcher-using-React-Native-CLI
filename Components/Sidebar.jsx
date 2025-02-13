@@ -1,23 +1,29 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableWithoutFeedback, Linking, TextInput, Button, Pressable } from "react-native";
+import { View, Text, StyleSheet,Image, TouchableWithoutFeedback, Linking, TextInput, Button, Pressable, ScrollView } from "react-native";
 import { SettingsContext } from "../Context/SettingsContext";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import IonIcon from "react-native-vector-icons/Ionicons";
 import { useDrawerStatus } from "@react-navigation/drawer";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
+import { wallpapers } from "../Constants/wallpapers";
 
 function Sidebar() {
-  const { showAppIcons, toggleAppIcons, shuffleApps, toggleShuffleApps,lockedTime, setLockedTime } = useContext(SettingsContext);
+  const { showAppIcons, toggleAppIcons, shuffleApps, toggleShuffleApps,lockedTime, setLockedTime ,selectedWallpaper,
+    changeWallpaper} = useContext(SettingsContext);
   const [appListCollapsed, setAppListCollapsed] = useState(true);
   const [phoneLockCollapsed, setPhoneLockCollapsed] = useState(true);
   const [newLockedTime, setNewLockedTime] = useState(lockedTime.toString());
   const drawerStatus = useDrawerStatus();
+
+  const [wallpaperCollapsed, setWallpaperCollapsed] = useState(true);
+  
 
   // Shared values for animations
   const switchTranslateX = useSharedValue(showAppIcons ? 20 : 0);
   const switchTranslateX2 = useSharedValue(shuffleApps ? 20 : 0);
   const appListHeight = useSharedValue(0);
   const phoneLockHeight = useSharedValue(0);
+  const wallpaperHeight = useSharedValue(0);
 
   // Animated styles
   const switchStyle = useAnimatedStyle(() => ({
@@ -56,12 +62,25 @@ function Sidebar() {
     }
   };
 
+
+  
+  const wallpaperStyle = useAnimatedStyle(() => ({
+    height: withTiming(wallpaperHeight.value, { duration: 300 }),
+    opacity: wallpaperHeight.value > 0 ? 1 : 0,
+  }));
+
+  const toggleWallpaperCollapse = () => {
+    setWallpaperCollapsed(!wallpaperCollapsed);
+    wallpaperHeight.value = wallpaperCollapsed ? 550 : 0;
+  };
+
   useEffect(() => {
     if (drawerStatus === "closed") {
       setAppListCollapsed(false);
       setPhoneLockCollapsed(false);
       appListHeight.value = 0;
       phoneLockHeight.value = 0;
+      wallpaperHeight.value = 0;
     }
   }, [drawerStatus]);
 
@@ -120,6 +139,32 @@ function Sidebar() {
               onChangeText={setNewLockedTime}/>
           <Button title="Set Lock Time" onPress={handleLockedTimeChange} />
         </Animated.View>
+      </View>
+
+      <View style={styles.collapsibleContainer}>
+        <TouchableWithoutFeedback onPress={toggleWallpaperCollapse}>
+          <View style={styles.collapsibleHeaderContainer}>
+            <Text style={styles.collapsibleHeader}>Wallpapers</Text>
+            <Icon name={!wallpaperCollapsed ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={24} color="white" />
+          </View>
+        </TouchableWithoutFeedback>
+        <Animated.View style={[styles.collapsedContent, wallpaperStyle]}>
+        <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 400 }}>
+  <View style={styles.wallpaperGrid}>
+    {Object.keys(wallpapers).map((key) => (
+      <Pressable key={key} onPress={() => changeWallpaper(key)} style={styles.wallpaperItem}>
+        <Image source={wallpapers[key]} style={styles.wallpaperImage} />
+        {parseInt(selectedWallpaper) -1 == key && (
+          <View style={styles.tickOverlay}>
+            <IonIcon name="checkmark-circle" size={30} color="white" />
+          </View>
+        )}
+      </Pressable>
+    ))}
+  </View>
+</ScrollView>
+</Animated.View>
+
       </View>
 
       {/* Links */}
@@ -182,6 +227,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  wallpaperGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap", // Auto line break after 2 images
+    justifyContent: "space-between",
+    padding: 5,
+  },
+  wallpaperItem: {
+    width: "48%", // 2 images in one row
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  wallpaperImage: {
+    width: "100%",
+    height: 200, // Increased height
+    borderRadius: 10,
+  },
+  tickOverlay: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 15,
+    padding: 2,
   },
 });
 
