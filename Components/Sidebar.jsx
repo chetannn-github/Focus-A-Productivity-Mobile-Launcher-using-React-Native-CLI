@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text, StyleSheet,Image, TouchableWithoutFeedback, Linking, TextInput, Button, Pressable, ScrollView } from "react-native";
+import { View, Text, StyleSheet,Image, TouchableWithoutFeedback, Linking, TextInput, Button, Pressable, ScrollView, SafeAreaView } from "react-native";
 import { SettingsContext } from "../Context/SettingsContext";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import IonIcon from "react-native-vector-icons/Ionicons";
@@ -47,12 +47,12 @@ function Sidebar() {
   // Toggle functions with animations
   const toggleAppListCollapse = () => {
     setAppListCollapsed(!appListCollapsed);
-    appListHeight.value = appListCollapsed ? 0 : 75; 
+    appListHeight.value = appListCollapsed ? 0 : 85; 
   };
 
   const togglePhoneLockCollapse = () => {
     setPhoneLockCollapsed(!phoneLockCollapsed);
-    phoneLockHeight.value = phoneLockCollapsed ? 0 : 100;
+    phoneLockHeight.value = phoneLockCollapsed ? 0 : 110;
   };
 
   const handleLockedTimeChange = () => {
@@ -62,8 +62,6 @@ function Sidebar() {
     }
   };
 
-
-  
   const wallpaperStyle = useAnimatedStyle(() => ({
     height: withTiming(wallpaperHeight.value, { duration: 300 }),
     opacity: wallpaperHeight.value > 0 ? 1 : 0,
@@ -78,6 +76,7 @@ function Sidebar() {
     if (drawerStatus === "closed") {
       setAppListCollapsed(false);
       setPhoneLockCollapsed(false);
+      setWallpaperCollapsed(true);
       appListHeight.value = 0;
       phoneLockHeight.value = 0;
       wallpaperHeight.value = 0;
@@ -85,7 +84,7 @@ function Sidebar() {
   }, [drawerStatus]);
 
   return (
-    <View style={styles.sidebar}>
+    <SafeAreaView style={styles.sidebar}>
       <Text style={styles.header}>Focus Launcher</Text>
 
       {/* App List Section */}
@@ -154,7 +153,7 @@ function Sidebar() {
     {Object.keys(wallpapers).map((key) => (
       <Pressable key={key} onPress={() => changeWallpaper(key)} style={styles.wallpaperItem}>
         <Image source={wallpapers[key]} style={styles.wallpaperImage} />
-        {parseInt(selectedWallpaper) -1 == key && (
+        {selectedWallpaper === key && (
           <View style={styles.tickOverlay}>
             <IonIcon name="checkmark-circle" size={30} color="white" />
           </View>
@@ -162,7 +161,7 @@ function Sidebar() {
       </Pressable>
     ))}
   </View>
-</ScrollView>
+        </ScrollView>
 </Animated.View>
 
       </View>
@@ -178,7 +177,7 @@ function Sidebar() {
           <IonIcon name="logo-github" size={20} color="red" />
         </Text>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
