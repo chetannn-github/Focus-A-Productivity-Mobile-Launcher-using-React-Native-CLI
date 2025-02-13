@@ -5,15 +5,25 @@ import { useNavigation } from "@react-navigation/native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SettingsContext } from "../Context/SettingsContext";
 import { formatTime, getRandomQuote } from "../Constants/functions";
+import { NativeModules } from 'react-native';
+
+const { InstalledApps } = NativeModules;
 
 export function HomeScreen() {
     const [quote, setQuote] = useState(getRandomQuote());
     const { showLeetcodeStats } = useContext(SettingsContext);
     const navigation = useNavigation();
 
-    const openPhoneApp = () => {
-        Linking.sendIntent('android.intent.action.DIAL');
+    const openPhoneApp = async () => {
+        try {
+            const phone = await InstalledApps.getDefaultPhoneApp();
+            await InstalledApps.openApp(phone);
+            console.log(phone);
+        } catch (error) {
+            console.error("Error opening default phone app:", error);
+        }
     };
+    
 
     useEffect(() => { 
     let id = setInterval(() => {

@@ -127,4 +127,31 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) :
             promise.reject("ERROR", e)
         }
     }
+
+    @ReactMethod
+    fun getDefaultPhoneApp(promise: Promise) {
+    try {
+        val pm: PackageManager = reactApplicationContext.packageManager
+        val intent = Intent(Intent.ACTION_DIAL)
+        val resolveInfo = pm.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+
+        if (resolveInfo != null) {
+            val packageName = resolveInfo.activityInfo.packageName
+            promise.resolve(packageName)
+        } else {
+            promise.reject("ERROR", "No default phone app found")
+        }
+    } catch (e: Exception) {
+        promise.reject("ERROR", e.message)
+    }
+    }
+
+
+
+
+
+
+
+
+    
 }
