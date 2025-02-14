@@ -35,6 +35,11 @@ export const wallpapers = [
     require("../assets/wallpapers/wallpaper34.jpg"),
     require("../assets/wallpapers/wallpaper35.jpg"),
     
+    require("../assets/wallpapers/wallpaper36.jpg"),
+    require("../assets/wallpapers/wallpaper37.jpg"),
+    require("../assets/wallpapers/wallpaper38.jpg"),
+    require("../assets/wallpapers/wallpaper39.jpg"),
+    require("../assets/wallpapers/wallpaper40.jpg"),
 
   ];
 
@@ -75,5 +80,10 @@ export const wallpapers = [
     wallpaper33: require("../assets/wallpapers/wallpaper33.jpg"),
     wallpaper34: require("../assets/wallpapers/wallpaper34.jpg"),
     wallpaper35: require("../assets/wallpapers/wallpaper35.jpg"),
+    wallpaper36: require("../assets/wallpapers/wallpaper36.jpg"),
+    wallpaper37: require("../assets/wallpapers/wallpaper37.jpg"),
+    wallpaper38: require("../assets/wallpapers/wallpaper38.jpg"),
+    wallpaper39: require("../assets/wallpapers/wallpaper39.jpg"),
+    wallpaper40: require("../assets/wallpapers/wallpaper40.jpg"),
   };
   

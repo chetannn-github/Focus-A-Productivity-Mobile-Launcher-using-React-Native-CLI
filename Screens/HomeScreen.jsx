@@ -55,10 +55,9 @@ export function HomeScreen() {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
         <ImageBackground 
-  source={selectedWallpaper ? wallpaperURIString : require("../assets/wallpapers/wallpaper1.jpg")}  
-  
-
-        style={{ flex:1, backgroundColor: 'black', paddingTop:50 ,paddingHorizontal:15,flexDirection:"column",justifyContent:"flex-start",alignContent:"flex-start"}}>
+            source={selectedWallpaper ? wallpaperURIString : require("../assets/wallpapers/wallpaper1.jpg")}  
+            resizeMode="cover"
+            style={{ flex:1, backgroundColor: 'black', paddingTop:50 ,paddingHorizontal:15,flexDirection:"column",justifyContent:"flex-start",alignContent:"flex-start"}}>
             
             {/* {showLeetcodeStats && <Progress />} */}
             <StatusBar 
