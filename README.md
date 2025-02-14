@@ -1,24 +1,10 @@
-### today's todos.
-1. wallpapers(done)
-2. time based locking more rigrous.
-
-
-## Fixes to be done.
-
-2. Add clock at home screen. (done)
-3. Time based  locking more rigrous.
-4. Add options to each app.(UNINSTALL, APP INFO,ETC)
-5. Gesture hat jaa rhaa hh MI ke phones me.
-6. Improve UI of setting screen. (done)
-7. Add wallpapers. (done)
-8. add selected that can be used at the time of locking.
-9. user se install krne prr puche.
-
-
-
-## Next Version
-1. (Temp fixed by adding refresh control) Update live LeetCode data (API polling but money problem!).
-2. Leetcode torture.
+## Feature to be added.
+1. Time based locking more rigrous.
+2. Fix  clock UI at home screen.
+3. Add options to each app.(UNINSTALL, APP INFO,ETC)
+4. Gesture hat jaa rhaa hh MI ke phones me.
+5. user se install krne prr puche.(to set default home app)
+6. Add gestures to home screen like doubletap to lock , swipe down for notification panel.
 
 
 
