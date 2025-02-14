@@ -1,5 +1,5 @@
 ### today's todos.
-1. wallpapers
+1. wallpapers(done)
 2. time based locking more rigrous.
 
 
@@ -10,7 +10,7 @@
 4. Add options to each app.(UNINSTALL, APP INFO,ETC)
 5. Gesture hat jaa rhaa hh MI ke phones me.
 6. Improve UI of setting screen. (done)
-7. Add wallpapers.
+7. Add wallpapers. (done)
 8. add selected that can be used at the time of locking.
 9. user se install krne prr puche.
 
