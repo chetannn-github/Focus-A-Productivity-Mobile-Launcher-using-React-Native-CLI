@@ -17,4 +17,5 @@
     <img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/app%20drawer.png" width="30%" />
     <img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/home.png" width="30%" />
     <img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/playstore.jpg" width="30%" />
+     <img src="https://github.com/chetannn-github/Focus-A-Productivity-Mobile-Launcher-using-React-Native-CLI/blob/main/assets/preview/playstore2.jpg" width="100%" />
 </p>
