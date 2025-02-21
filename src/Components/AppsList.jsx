@@ -3,6 +3,7 @@ import { View, Text, AppListstyleheet, ActivityIndicator, Image, NativeEventEmit
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SettingsContext } from '../Context/SettingsContext';
 import { AppListstyle } from '../Stylesheets/AppListStyle';
+import useApps from '../Hooks/useApps';
 
 
 const { InstalledApps } = NativeModules;
@@ -10,32 +11,8 @@ const { InstalledApps } = NativeModules;
 
 const AppsList = () => {
   const installedAppsEmitter = new NativeEventEmitter(InstalledApps);
-  const { showAppIcons, shuffleApps } = useContext(SettingsContext);
-  const [apps, setApps] = useState([]);
-  const [originalApps, setOriginalApps] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchApps = async () => {
-    try {
-      const apps = await InstalledApps.getInstalledApps();
-      setOriginalApps(apps);
-      updateAppsList(apps);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching installed apps: ', error);
-      setLoading(false);
-    }
-  };
-
-  const updateAppsList = (appList) => {
-    let updatedApps = [...appList];
-    if (!shuffleApps) {
-      updatedApps.sort((a, b) => a.appName.toLowerCase().localeCompare(b.appName.toLowerCase()));
-    } else {
-      updatedApps.sort(() => Math.random() - 0.5);
-    }
-    setApps(updatedApps);
-  };
+  const { shuffleApps } = useContext(SettingsContext);
+  const {fetchApps, updateAppsList, openApp ,loading,apps,showAppIcons,originalApps} = useApps();
 
   useEffect(() => {
     fetchApps();
@@ -49,11 +26,6 @@ const AppsList = () => {
     updateAppsList(originalApps);
   }, [shuffleApps]);
 
-  const openApp = (packageName) => {
-    InstalledApps.openApp(packageName)
-      .then(() => console.log(`Opened: ${packageName}`))
-      .catch((error) => console.error('Error opening app: ', error));
-  };
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
