@@ -1,89 +1,37 @@
-import React, { useContext, useEffect, useState } from "react";
-import { View, Text, StyleSheet,Image, TouchableWithoutFeedback, Linking, TextInput, Button, Pressable, ScrollView, SafeAreaView, FlatList, TouchableOpacity } from "react-native";
+import React, { useContext} from "react";
+import { View, Text,Image, TouchableWithoutFeedback, Linking, TextInput, Button, Pressable, ScrollView, SafeAreaView, FlatList, TouchableOpacity } from "react-native";
 import { SettingsContext } from "../Context/SettingsContext";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import IonIcon from "react-native-vector-icons/Ionicons";
-import { useDrawerStatus } from "@react-navigation/drawer";
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import { wallpapers } from "../Constants/wallpapers";
 import { styles } from "../Stylesheets/SettingScreenStyle";
+import useSetting from "../Hooks/useSetting";
 
 function SettingScreen() {
-  const { showAppIcons, toggleAppIcons, shuffleApps, toggleShuffleApps,lockedTime, setLockedTime ,selectedWallpaper,
+  const  {
+    handleLockedTimeChange,
+    newLockedTime,
+    setNewLockedTime,
+    appListCollapsed,
+    phoneLockCollapsed,
+    wallpaperCollapsed,
+    toggleAppListCollapse,
+    togglePhoneLockCollapse,
+    toggleWallpaperCollapse,
+    wallpaperStyle,
+    switchStyle,
+    switchStyle2,
+    appListStyle,
+    phoneLockStyle,
+    switchTranslateX,
+    switchTranslateX2
+  } = useSetting();
+
+  const { showAppIcons, toggleAppIcons, shuffleApps, toggleShuffleApps ,selectedWallpaper,
     changeWallpaper} = useContext(SettingsContext);
-  const [appListCollapsed, setAppListCollapsed] = useState(true);
-  const [phoneLockCollapsed, setPhoneLockCollapsed] = useState(true);
-  const [newLockedTime, setNewLockedTime] = useState(lockedTime.toString());
-  const drawerStatus = useDrawerStatus();
-
-  const [wallpaperCollapsed, setWallpaperCollapsed] = useState(true);
+ 
   
-
-  // Shared values for animations
-  const switchTranslateX = useSharedValue(showAppIcons ? 20 : 0);
-  const switchTranslateX2 = useSharedValue(shuffleApps ? 20 : 0);
-  const appListHeight = useSharedValue(0);
-  const phoneLockHeight = useSharedValue(0);
-  const wallpaperHeight = useSharedValue(0);
-
-  // Animated styles
-  const switchStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: withTiming(switchTranslateX.value, { duration: 200 }) }],
-  }));
-
-  const switchStyle2 = useAnimatedStyle(() => ({
-    transform: [{ translateX: withTiming(switchTranslateX2.value, { duration: 200 }) }],
-  }));
-
-  const appListStyle = useAnimatedStyle(() => ({
-    height: withTiming(appListHeight.value, { duration: 300 }),
-    opacity: appListHeight.value > 0 ? 1 : 0,
-  }));
-
-  const phoneLockStyle = useAnimatedStyle(() => ({
-    height: withTiming(phoneLockHeight.value, { duration: 300 }),
-    opacity: phoneLockHeight.value > 0 ? 1 : 0,
-  }));
-
-  // Toggle functions with animations
-  const toggleAppListCollapse = () => {
-    setAppListCollapsed(!appListCollapsed);
-    appListHeight.value = appListCollapsed ? 0 : 85; 
-  };
-
-  const togglePhoneLockCollapse = () => {
-    setPhoneLockCollapsed(!phoneLockCollapsed);
-    phoneLockHeight.value = phoneLockCollapsed ? 0 : 110;
-  };
-
-  const handleLockedTimeChange = () => {
-    const time = parseInt(newLockedTime, 10);
-    if (!isNaN(time) && time >= 0) {
-      setLockedTime(time);
-    }
-  };
-
-  const wallpaperStyle = useAnimatedStyle(() => ({
-    height: withTiming(wallpaperHeight.value, { duration: 300 }),
-    opacity: wallpaperHeight.value > 0 ? 1 : 0,
-  }));
-
-  const toggleWallpaperCollapse = () => {
-    setWallpaperCollapsed(!wallpaperCollapsed);
-    wallpaperHeight.value = wallpaperCollapsed ? 550 : 0;
-  };
-
-  useEffect(() => {
-    if (drawerStatus === "closed") {
-      setAppListCollapsed(false);
-      setPhoneLockCollapsed(false);
-      setWallpaperCollapsed(true);
-      appListHeight.value = 0;
-      phoneLockHeight.value = 0;
-      wallpaperHeight.value = 0;
-    }
-  }, [drawerStatus]);
-
   return (
     <SafeAreaView style={styles.SettingScreen}>
       <Text style={styles.header}>Focus Launcher</Text>
