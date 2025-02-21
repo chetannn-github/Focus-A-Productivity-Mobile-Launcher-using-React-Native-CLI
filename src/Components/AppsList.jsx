@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Image, NativeEventEmitter, NativeModules, FlatList, SafeAreaView } from 'react-native';
+import { View, Text, AppListstyleheet, ActivityIndicator, Image, NativeEventEmitter, NativeModules, FlatList, SafeAreaView } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SettingsContext } from '../Context/SettingsContext';
+import { AppListstyle } from '../Stylesheets/AppListStyle';
+
 
 const { InstalledApps } = NativeModules;
-const installedAppsEmitter = new NativeEventEmitter(InstalledApps);
+
 
 const AppsList = () => {
+  const installedAppsEmitter = new NativeEventEmitter(InstalledApps);
   const { showAppIcons, shuffleApps } = useContext(SettingsContext);
   const [apps, setApps] = useState([]);
   const [originalApps, setOriginalApps] = useState([]);
@@ -54,7 +57,7 @@ const AppsList = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={AppListstyle.container}>
         {loading ? (
           <ActivityIndicator size="large" color="white" />
         ) : apps.length > 0 ? (
@@ -63,15 +66,15 @@ const AppsList = () => {
             showsVerticalScrollIndicator={false}
             keyExtractor={(item) => item.packageName}
             renderItem={({ item }) => (
-              <View style={styles.appItem} onTouchEnd={() => openApp(item.packageName)}>
+              <View style={AppListstyle.appItem} onTouchEnd={() => openApp(item.packageName)}>
                 {showAppIcons && item.icon && (
                   <Image
                     source={{ uri: item.icon ? `data:image/png;base64,${item.icon}` : "https://picsum.photos/200" }}
-                    style={styles.appIcon}
+                    style={AppListstyle.appIcon}
                     resizeMode="contain"
                   />
                 )}
-                <Text style={styles.appName}>{item.appName}</Text>
+                <Text style={AppListstyle.appName}>{item.appName}</Text>
               </View>
             )}
             bounces={true}  // iOS bounce enable
@@ -79,43 +82,13 @@ const AppsList = () => {
             contentContainerStyle={{ paddingBottom: 20 }}
           />
         ) : (
-          <Text style={styles.noApps}>No apps found</Text>
+          <Text style={AppListstyle.noApps}>No apps found</Text>
         )}
       </SafeAreaView>
     </GestureHandlerRootView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'black',
-    paddingTop: 20,
-    paddingHorizontal: 25,
-    marginTop: 10,
-  },
-  appItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    marginBottom: 9,
-  },
-  appIcon: {
-    width: 25,
-    height: 27,
-    marginRight: 10,
-  },
-  appName: {
-    color: 'white',
-    fontSize: 15,
-  },
-  noApps: {
-    color: 'white',
-    opacity: 0.7,
-    fontSize: 18,
-    textAlign: 'center',
-    marginTop: 20,
-  },
-});
+
 
 export default AppsList;

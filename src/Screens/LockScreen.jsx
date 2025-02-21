@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { SettingsContext } from "../Context/SettingsContext";
 import { motivationalQuotes } from "../Constants/quotes";
+import { styles } from "../Stylesheets/LockScreenStyle";
 
 
 
@@ -40,11 +41,6 @@ const LockScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#000", padding: 20 },
-  timer: { fontSize: 48, color: "#fff", fontWeight: "bold" },
-  message: { fontSize: 18, color: "#fff", marginTop: 10 },
-  quote: { fontSize: 16, color: "#fff", marginTop: 20, fontStyle: "italic", textAlign: "center" },
-});
+
 
 export default LockScreen;

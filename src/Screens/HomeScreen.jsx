@@ -13,7 +13,7 @@ const { InstalledApps } = NativeModules;
 export default function HomeScreen() {
    
     const [quote, setQuote] = useState(getRandomQuote());
-    const { showLeetcodeStats ,selectedWallpaper} = useContext(SettingsContext);
+    const { selectedWallpaper} = useContext(SettingsContext);
     const navigation = useNavigation();
     const wallpaperURI = parseInt(selectedWallpaper) + 1;
     const wallpaperURIString = wallpapersObj["wallpaper"+wallpaperURI+""];
@@ -59,7 +59,7 @@ export default function HomeScreen() {
             resizeMode="cover"
             style={{ flex:1, backgroundColor: 'black', paddingTop:50 ,paddingHorizontal:15,flexDirection:"column",justifyContent:"flex-start",alignContent:"flex-start"}}>
             
-            {/* {showLeetcodeStats && <Progress />} */}
+            
             <StatusBar 
                 barStyle="light-content" 
                 translucent={true} 
