@@ -7,7 +7,7 @@ import { useDrawerStatus } from "@react-navigation/drawer";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { wallpapers } from "../Constants/wallpapers";
 
-function Sidebar() {
+function SettingScreen() {
   const { showAppIcons, toggleAppIcons, shuffleApps, toggleShuffleApps,lockedTime, setLockedTime ,selectedWallpaper,
     changeWallpaper} = useContext(SettingsContext);
   const [appListCollapsed, setAppListCollapsed] = useState(true);
@@ -84,7 +84,7 @@ function Sidebar() {
   }, [drawerStatus]);
 
   return (
-    <SafeAreaView style={styles.sidebar}>
+    <SafeAreaView style={styles.SettingScreen}>
       <Text style={styles.header}>Focus Launcher</Text>
 
       {/* App List Section */}
@@ -198,7 +198,7 @@ function Sidebar() {
 }
 
 const styles = StyleSheet.create({
-  sidebar: { flex: 1, alignItems: "center", backgroundColor: "black", paddingHorizontal: 20, paddingTop: 50 },
+  SettingScreen: { flex: 1, alignItems: "center", backgroundColor: "black", paddingHorizontal: 20, paddingTop: 50 },
   header: { color: "white", fontSize: 22, marginBottom: 20 },
   collapsibleContainer: { width: "100%", marginBottom: 7 },
   collapsibleHeaderContainer: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
@@ -269,4 +269,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Sidebar;
+export default SettingScreen;

@@ -1,16 +1,16 @@
 import React, { useContext, useState, useEffect } from "react";
-import { View, Text, Linking, ImageBackground, StatusBar, SafeAreaView } from "react-native";
-import Progress from "../Components/Progress";
+import { View, Text, ImageBackground, StatusBar, SafeAreaView } from "react-native";
+
 import { useNavigation } from "@react-navigation/native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SettingsContext } from "../Context/SettingsContext";
 import { formatTime, getRandomQuote } from "../Constants/functions";
 import { NativeModules } from 'react-native';
-import { wallpapers, wallpapersObj } from "../Constants/wallpapers";
+import {  wallpapersObj } from "../Constants/wallpapers";
 
 const { InstalledApps } = NativeModules;
 
-export function HomeScreen() {
+export default function HomeScreen() {
    
     const [quote, setQuote] = useState(getRandomQuote());
     const { showLeetcodeStats ,selectedWallpaper} = useContext(SettingsContext);
