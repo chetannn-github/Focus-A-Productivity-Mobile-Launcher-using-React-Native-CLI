@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, AppListstyleheet, ActivityIndicator, Image, NativeEventEmitter, NativeModules, FlatList, SafeAreaView } from 'react-native';
+import React, { useEffect, useContext } from 'react';
+import { Text, ActivityIndicator, Image, NativeEventEmitter, NativeModules, FlatList, SafeAreaView, TouchableOpacity } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SettingsContext } from '../Context/SettingsContext';
 import { AppListstyle } from '../Stylesheets/AppListStyle';
@@ -23,7 +23,7 @@ const AppsList = () => {
   }, []);
 
   useEffect(() => {
-    updateAppsList(originalApps);
+    if(shuffleApps) updateAppsList(originalApps);
   }, [shuffleApps]);
 
 
@@ -37,20 +37,24 @@ const AppsList = () => {
             data={apps}
             showsVerticalScrollIndicator={false}
             keyExtractor={(item) => item.packageName}
-            renderItem={({ item }) => (
-              <View style={AppListstyle.appItem} onTouchEnd={() => openApp(item.packageName)}>
+            renderItem={({ item }) => (  
+              <TouchableOpacity 
+                style={AppListstyle.appItem} 
+                activeOpacity={0.7}
+                onPress={() => openApp(item.packageName)}
+              >
                 {showAppIcons && item.icon && (
                   <Image
-                    source={{ uri: item.icon ? `data:image/png;base64,${item.icon}` : "https://picsum.photos/200" }}
+                    source={{ uri: `data:image/png;base64,${item.icon}` }}
                     style={AppListstyle.appIcon}
                     resizeMode="contain"
                   />
                 )}
                 <Text style={AppListstyle.appName}>{item.appName}</Text>
-              </View>
+              </TouchableOpacity>
             )}
-            bounces={true}  // iOS bounce enable
-            overScrollMode="always"  // Android bounce enable
+            bounces={true}  
+            overScrollMode="always"
             contentContainerStyle={{ paddingBottom: 20 }}
           />
         ) : (
