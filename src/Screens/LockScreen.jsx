@@ -11,7 +11,8 @@ const LockScreen = () => {
     setRemainingTime, 
     isLCLocked, 
     checkLCUnlockStatus, 
-    isChecking
+    isChecking,
+    questionsToSolve,
   } = useSettingsStore();
   
   const [quote, setQuote] = useState("");
@@ -44,12 +45,27 @@ const LockScreen = () => {
   }, []);
 
   const handleCheckLeetCode = async () => {
-    const unlocked = await checkLCUnlockStatus();
+    const status = await checkLCUnlockStatus();
+    
+    // Safety check in case status is returned as boolean from older store version
+    const isUnlocked = typeof status === 'object' ? status.unlocked : status;
+    const solved = typeof status === 'object' ? status.solved : 0;
+    const needed = typeof status === 'object' ? status.needed : questionsToSolve;
 
-    if (unlocked) {
-      showAlert("Unlocked!", "Great job solving that problem! Apps restored.", "Let's Go", "success");
+    if (isUnlocked) {
+      showAlert(
+        "Freedom Achieved! 🚀", 
+        `Awesome work! You crushed those ${needed} LeetCode problem(s). Your apps are now unlocked.`, 
+        "Let's Go!", 
+        "success"
+      );
     } else {
-      showAlert("Still Locked", "You haven't solved a new problem yet. Get back to coding!", "Back to LeetCode", "error");
+      showAlert(
+        "Keep Grinding! 💻", 
+        `You've solved ${solved} out of ${needed} required problem${needed > 1 ? "s" : ""}.\n\nHead back to LeetCode and finish the job!`, 
+        "Back to Code", 
+        "error"
+      );
     }
   };
 
@@ -62,9 +78,14 @@ const LockScreen = () => {
             {Math.floor(remainingTime / 60)}:{String(remainingTime % 60).padStart(2, "0")}
           </Text>
         ) : (
-          <Text style={[styles.timer, { fontSize: 32 }]}>
-            Locked for Focus
-          </Text>
+          <View style={{ alignItems: 'center' }}>
+            <Text style={[styles.timer, { fontSize: 32 }]}>
+              Locked for Focus
+            </Text>
+            <Text style={{ color: '#0A84FF', fontSize: 16, fontWeight: '600', marginTop: 10 }}>
+              Goal: Solve {questionsToSolve} Problem{questionsToSolve > 1 ? "s" : ""}
+            </Text>
+          </View>
         )}
 
         <Text style={styles.message}>Your phone is locked.</Text>

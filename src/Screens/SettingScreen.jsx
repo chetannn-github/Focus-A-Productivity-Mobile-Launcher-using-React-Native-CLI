@@ -33,7 +33,7 @@ function SettingScreen() {
 
   const { 
     showAppIcons, toggleAppIcons, selectedWallpaper, shuffleApps, toggleShuffleApps,
-    changeWallpaper, isLCLocked, lockWithLeetCode, checkLCUnlockStatus, lcUsername, isChecking
+    changeWallpaper, isLCLocked, lockWithLeetCode, checkLCUnlockStatus, lcUsername, isChecking, questionsToSolve
   } = useSettingsStore();
   
   const { hiddenApps, unhideApp, masterApps } = useApps(); 
@@ -44,6 +44,7 @@ function SettingScreen() {
 
   const [inputUsername, setInputUsername] = useState(lcUsername);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [selectedQuestions, setSelectedQuestions] = useState(1);
   const [alertConfig, setAlertConfig] = useState({visible : false, title: '', message: '', confirmText: 'OK' });
 
   const showAlert = (title, message, confirmText = "OK") => {
@@ -54,9 +55,7 @@ function SettingScreen() {
   const hideAlert = () => setAlertConfig((prev) => ({ ...prev, visible: false }));
 
   useEffect(() => {
-    if (lcUsername && !inputUsername) {
-      setInputUsername(lcUsername);
-    }
+    if (lcUsername && !inputUsername) setInputUsername(lcUsername);
   }, [lcUsername]);
 
   const handleLeetCodeLock = async () => {
@@ -65,21 +64,23 @@ function SettingScreen() {
       showAlert("Hold up", "Please enter a valid LeetCode username.", "Got it");
       return;
     }
-    const success = await lockWithLeetCode(finalUsername);
+    
+    const success = await lockWithLeetCode(finalUsername, selectedQuestions);
+    
     if(success) {
       setIsEditingUsername(false); 
-      showAlert("Locked!", `Focus launcher is now locked to ${finalUsername}!`, "Awesome");
+      showAlert("Locked!", `Focus launcher is now locked to ${finalUsername}! You must solve ${selectedQuestions} question(s) to unlock.`, "Awesome");
     } else {
       showAlert("Error", "Could not verify username. Check network or spelling.", "Retry");
     }
   };
 
   const handleCheckUnlock = async () => {
-    const unlocked = await checkLCUnlockStatus();
-    if (unlocked) {
-      showAlert("Unlocked!", "Great job solving that problem! Apps restored.", "Let's Go");
+    const status = await checkLCUnlockStatus();
+    if (status.unlocked) {
+      showAlert("Unlocked!", `Great job solving ${status.needed} problem(s)! Apps restored.`, "Let's Go");
     } else {
-      showAlert("Still Locked", "You haven't solved a new problem yet. Get back to coding!", "Back to LeetCode");
+      showAlert("Still Locked", `You have solved ${status.solved} out of ${status.needed} required problems. Get back to coding!`, "Back to LeetCode");
     }
   };
 
@@ -111,7 +112,7 @@ function SettingScreen() {
               </View>
             </TouchableWithoutFeedback>
             
-            <Animated.View style={[styles.collapsedContent, appListStyle]}>
+            <Animated.View style={[styles.collapsedContent, appListStyle, { paddingBottom: 10 }]}>
               <View style={[styles.switchContainer, { borderTopWidth: 0, paddingVertical: 8 }]}>
                 <Text style={styles.switchLabel}>Show App Icons</Text>
                 <Pressable
@@ -253,11 +254,14 @@ function SettingScreen() {
               </View>
             </TouchableWithoutFeedback>
             
-            <Animated.View style={[styles.collapsedContent, leetCodeStyle, { paddingBottom: 10 }]}>
+            <Animated.View style={[styles.collapsedContent, leetCodeStyle, { paddingBottom: 15 }]}>
               {isLCLocked ? (
                 <View style={{ paddingTop: 5 }}>
                   <Text style={[styles.switchLabel, { marginBottom: 15, textAlign: 'center', color: '#FF453A' }]}>
                     Device is currently locked! 
+                  </Text>
+                  <Text style={{ color: '#E5E5EA', textAlign: 'center', marginBottom: 15 }}>
+                    Required to solve: {questionsToSolve} question(s)
                   </Text>
                   <TouchableOpacity 
                     style={[styles.primaryBtn, { backgroundColor: '#30D158' }, isChecking && styles.primaryBtnDisabled]} 
@@ -274,6 +278,24 @@ function SettingScreen() {
                       <Text style={[styles.switchLabel, { textAlign: 'center', marginBottom: 15 }]}>
                         Linked to: <Text style={{ color: '#0A84FF', fontWeight: 'bold' }}>{lcUsername}</Text>
                       </Text>
+                      
+                      <View style={{ marginBottom: 15 }}>
+                        <Text style={[styles.switchLabel, { marginBottom: 12, textAlign: 'center' }]}>Questions to solve</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                          {[1, 2, 3, 4, 5].map((num) => (
+                            <TouchableOpacity 
+                              key={num}
+                              style={[customStyles.smallBadge, selectedQuestions === num && customStyles.smallBadgeActive]}
+                              onPress={() => setSelectedQuestions(num)}
+                            >
+                              <Text style={[customStyles.smallBadgeText, selectedQuestions === num && customStyles.smallBadgeTextActive]}>
+                                {num}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </View>
+
                       <TouchableOpacity 
                         style={[styles.primaryBtn, isChecking && styles.primaryBtnDisabled]} 
                         onPress={handleLeetCodeLock} 
@@ -289,7 +311,7 @@ function SettingScreen() {
                     <View style={{ paddingTop: 5 }}>
                       <Text style={styles.switchLabel}>LeetCode Username</Text>
                       <TextInput
-                        style={[styles.input, { marginTop: 8, marginBottom: 12, paddingVertical: 10 }]}
+                        style={[styles.input, { marginTop: 8, marginBottom: 15, paddingVertical: 10 }]}
                         placeholder="e.g. neetcode"
                         placeholderTextColor="#636366"
                         value={inputUsername}
@@ -297,6 +319,24 @@ function SettingScreen() {
                         autoCapitalize="none"
                         autoCorrect={false}
                       />
+
+                      <View style={{ marginBottom: 15 }}>
+                        <Text style={[styles.switchLabel, { marginBottom: 12, textAlign: 'center' }]}>Questions to solve</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                          {[1, 2, 3, 4, 5].map((num) => (
+                            <TouchableOpacity 
+                              key={num}
+                              style={[customStyles.smallBadge, selectedQuestions === num && customStyles.smallBadgeActive]}
+                              onPress={() => setSelectedQuestions(num)}
+                            >
+                              <Text style={[customStyles.smallBadgeText, selectedQuestions === num && customStyles.smallBadgeTextActive]}>
+                                {num}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </View>
+
                       <TouchableOpacity 
                         style={[styles.primaryBtn, { paddingVertical: 10 }, isChecking && styles.primaryBtnDisabled]} 
                         onPress={handleLeetCodeLock} 
@@ -358,6 +398,28 @@ function SettingScreen() {
 }
 
 const customStyles = StyleSheet.create({
+  smallBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20, 
+    backgroundColor: '#1C1C1E',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#2C2C2E',
+  },
+  smallBadgeActive: {
+    backgroundColor: 'rgba(48, 209, 88, 0.15)', 
+    borderColor: '#30D158',
+  },
+  smallBadgeText: {
+    color: '#8E8E93',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  smallBadgeTextActive: {
+    color: '#30D158',
+  },
   sectionLabel: {
     color: '#8E8E93',
     fontSize: 13,
