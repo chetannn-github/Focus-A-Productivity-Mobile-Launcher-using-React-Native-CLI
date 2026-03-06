@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { 
   View, Text, Image, TouchableWithoutFeedback, Linking, TextInput, 
-  Button, Pressable, ScrollView, SafeAreaView, FlatList, 
-  TouchableOpacity, StyleSheet, Keyboard 
+  Pressable, ScrollView, SafeAreaView, FlatList, 
+  TouchableOpacity, StyleSheet, Keyboard, ActivityIndicator 
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import IonIcon from "react-native-vector-icons/Ionicons";
@@ -12,57 +12,46 @@ import { styles } from "../Stylesheets/SettingScreenStyle";
 import useSetting from "../Hooks/useSetting";
 import useApps from "../store/useAppsStore";
 import useSettingsStore from "../store/useSettingStore";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 function SettingScreen() {
   const  {
+    activeSection,
+    toggleSection,
     handleLockedTimeChange,
     newLockedTime,
     setNewLockedTime,
-    appListCollapsed,
-    phoneLockCollapsed,
-    wallpaperCollapsed,
-    toggleAppListCollapse,
-    togglePhoneLockCollapse,
-    toggleWallpaperCollapse,
-    wallpaperStyle,
-    switchStyle,
-    switchStyle2,
     appListStyle,
     phoneLockStyle,
+    wallpaperStyle,
+    hiddenAppsStyle,
+    leetCodeStyle,
+    switchStyle,
+    switchStyle2,
     switchTranslateX,
     switchTranslateX2
   } = useSetting();
 
   const { 
     showAppIcons, toggleAppIcons, selectedWallpaper, shuffleApps, toggleShuffleApps,
-    changeWallpaper,
-    isLCLocked,            
-    lockWithLeetCode,
-    checkLCUnlockStatus,
-    lcUsername,
-    isChecking
+    changeWallpaper, isLCLocked, lockWithLeetCode, checkLCUnlockStatus, lcUsername, isChecking
   } = useSettingsStore();
   
-  const [hiddenCollapsed, setHiddenCollapsed] = useState(true);
   const { hiddenApps, unhideApp, masterApps } = useApps(); 
 
   const getAppDataByPackage = (pkgName) => {
     return masterApps?.find(a => a.packageName === pkgName);
   };
 
-  const [leetCodeCollapsed, setLeetCodeCollapsed] = useState(true);
   const [inputUsername, setInputUsername] = useState(lcUsername);
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [alertConfig, setAlertConfig] = useState({visible : false, title: '', message: '', confirmText: 'OK' });
 
   const showAlert = (title, message, confirmText = "OK") => {
-    Keyboard.dismiss(); // Ise on rakhna zaroori hai UX ke liye
+    Keyboard.dismiss(); 
     setAlertConfig({visible : true, title, message, confirmText });
   };
 
-  const hideAlert = () => {
-    setAlertConfig((prev) => ({ ...prev, visible: false }));
-  };
+  const hideAlert = () => setAlertConfig((prev) => ({ ...prev, visible: false }));
 
   useEffect(() => {
     if (lcUsername && !inputUsername) {
@@ -71,17 +60,15 @@ function SettingScreen() {
   }, [lcUsername]);
 
   const handleLeetCodeLock = async () => {
-    const finalUsername = inputUsername.trim() || lcUsername;
-    
+    const finalUsername = (isEditingUsername || !lcUsername) ? inputUsername.trim() : lcUsername;
     if(!finalUsername) {
-      showAlert("Hold up", "Please enter a LeetCode username.", "Got it");
+      showAlert("Hold up", "Please enter a valid LeetCode username.", "Got it");
       return;
     }
-
     const success = await lockWithLeetCode(finalUsername);
-  
     if(success) {
-      showAlert("Locked!", `Focus launcher is now locked to ${finalUsername} until you solve a problem!`, "Awesome");
+      setIsEditingUsername(false); 
+      showAlert("Locked!", `Focus launcher is now locked to ${finalUsername}!`, "Awesome");
     } else {
       showAlert("Error", "Could not verify username. Check network or spelling.", "Retry");
     }
@@ -89,7 +76,6 @@ function SettingScreen() {
 
   const handleCheckUnlock = async () => {
     const unlocked = await checkLCUnlockStatus();
-
     if (unlocked) {
       showAlert("Unlocked!", "Great job solving that problem! Apps restored.", "Let's Go");
     } else {
@@ -98,24 +84,38 @@ function SettingScreen() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaView style={styles.SettingScreen}>
-          <Text style={styles.header}>Focus Launcher</Text>
+    <View style={{ flex: 1, backgroundColor: "#000" }}>
+      <SafeAreaView style={[styles.SettingScreen, { paddingBottom: 0 }]}>
+        
+        <ScrollView 
+          showsVerticalScrollIndicator={false} 
+          contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.header}>Settings</Text>
 
-          {/* App List Section */}
+          {/* ========================================== */}
+          {/* SECTION 1: CUSTOMIZATION                   */}
+          {/* ========================================== */}
+          <Text style={customStyles.sectionLabel}>CUSTOMIZATION</Text>
+
+          {/* --- App List Section --- */}
           <View style={styles.collapsibleContainer}>
-            <TouchableWithoutFeedback onPress={toggleAppListCollapse}>
+            <TouchableWithoutFeedback onPress={() => toggleSection('appList')}>
               <View style={styles.collapsibleHeaderContainer}>
-                <Text style={styles.collapsibleHeader}>App Drawer</Text>
-                <Icon name={appListCollapsed ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={24} color="white" />
+                <View style={styles.sectionTitleRow}>
+                  <Icon name="grid-view" size={22} color="#0A84FF" />
+                  <Text style={styles.collapsibleHeader}>App Drawer</Text>
+                </View>
+                <Icon name={activeSection === 'appList' ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={24} color="#8E8E93" />
               </View>
             </TouchableWithoutFeedback>
+            
             <Animated.View style={[styles.collapsedContent, appListStyle]}>
-              <View style={styles.switchContainer}>
+              <View style={[styles.switchContainer, { borderTopWidth: 0, paddingVertical: 8 }]}>
                 <Text style={styles.switchLabel}>Show App Icons</Text>
                 <Pressable
-                  style={[styles.switchBase,{ backgroundColor: showAppIcons ? "blue" : "gray" }]}
+                  style={[styles.switchBase,{ backgroundColor: showAppIcons ? "#34C759" : "#3A3A3C" }]}
                   onPress={() => {
                     toggleAppIcons();
                     switchTranslateX.value = showAppIcons ? 0 : 20;
@@ -124,10 +124,11 @@ function SettingScreen() {
                   <Animated.View style={[styles.switchCircle, switchStyle]} />
                 </Pressable>
               </View>
-              <View style={styles.switchContainer}>
+              
+              <View style={[styles.switchContainer, { paddingVertical: 8 }]}>
                 <Text style={styles.switchLabel}>Shuffle Apps</Text>
                 <Pressable
-                  style={[styles.switchBase,{ backgroundColor: shuffleApps ? "blue" : "gray" }]}
+                  style={[styles.switchBase,{ backgroundColor: shuffleApps ? "#0A84FF" : "#3A3A3C" }]}
                   onPress={() => {
                     toggleShuffleApps();
                     switchTranslateX2.value = shuffleApps ? 0 : 20;
@@ -139,175 +140,203 @@ function SettingScreen() {
             </Animated.View>
           </View>
 
-          {/* Phone Lock Section */}
+          {/* --- Wallpapers Section --- */}
           <View style={styles.collapsibleContainer}>
-            <TouchableWithoutFeedback onPress={togglePhoneLockCollapse}>
+            <TouchableWithoutFeedback onPress={() => toggleSection('wallpaper')}>
               <View style={styles.collapsibleHeaderContainer}>
-                <Text style={styles.collapsibleHeader}>Phone Lock</Text>
-                <Icon name={phoneLockCollapsed ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={24} color="white" />
+                <View style={styles.sectionTitleRow}>
+                  <Icon name="wallpaper" size={22} color="#BF5AF2" />
+                  <Text style={styles.collapsibleHeader}>Wallpapers</Text>
+                </View>
+                <Icon name={activeSection === 'wallpaper' ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={24} color="#8E8E93" />
               </View>
             </TouchableWithoutFeedback>
-            <Animated.View style={[styles.collapsedContent, phoneLockStyle]}>
-              <Text style={styles.switchLabel}>Lock Duration (minutes):</Text>
-              <TextInput style={styles.input} keyboardType="numeric" placeholder="Enter time"  value={newLockedTime}
-                  onChangeText={setNewLockedTime}/>
-              <Button title="Set Lock Time" onPress={handleLockedTimeChange} />
+            
+            <Animated.View style={[styles.collapsedContent, wallpaperStyle, { paddingHorizontal: 10 }]}>
+              <ScrollView nestedScrollEnabled={true} style={{ height: 230 }} showsVerticalScrollIndicator={true}>
+                <View style={styles.wallpaperGrid}>
+                  {Object.keys(wallpapers).map((item) => (
+                    <View key={item} style={styles.wallpaperItem} onTouchEnd={() => changeWallpaper(item)}>
+                      <Image source={wallpapers[item]} style={styles.wallpaperImage} />
+                      {selectedWallpaper === item && (
+                        <View style={styles.tickOverlay}>
+                          <IonIcon name="checkmark-circle" size={28} color="#0A84FF" />
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
             </Animated.View>
           </View>
 
-          {/* Wallpapers Section */}
+          {/* --- Hidden Apps Section --- */}
           <View style={styles.collapsibleContainer}>
-            <TouchableWithoutFeedback onPress={toggleWallpaperCollapse}>
+            <TouchableWithoutFeedback onPress={() => toggleSection('hiddenApps')}>
               <View style={styles.collapsibleHeaderContainer}>
-                <Text style={styles.collapsibleHeader}>Wallpapers</Text>
-                <Icon name={!wallpaperCollapsed ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={24} color="white" />
+                <View style={styles.sectionTitleRow}>
+                  <Icon name="visibility-off" size={22} color="#FF453A" />
+                  <Text style={styles.collapsibleHeader}>Hidden Apps</Text>
+                </View>
+                <Icon name={activeSection === 'hiddenApps' ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={24} color="#8E8E93" />
               </View>
             </TouchableWithoutFeedback>
-            <Animated.View style={[styles.collapsedContent, wallpaperStyle]}>
-            <FlatList
-              data={Object.keys(wallpapers)}
-              keyExtractor={(item) => item}
-              numColumns={2} // Grid format
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={{ flexGrow: 1, padding: 10 }}
-              renderItem={({ item }) => (
-                <View 
-                  style={styles.wallpaperItem} 
-                  onTouchEnd={() => {
-                    console.log("Wallpaper changed:", item);
-                    changeWallpaper(item);
-                  }}
-                >
-                  <Image 
-                    source={wallpapers[item]} 
-                    style={styles.wallpaperImage} 
-                    pointerEvents="none" 
-                  />
-                  {selectedWallpaper === item && (
-                    <View style={styles.tickOverlay}>
-                      <IonIcon name="checkmark-circle" size={30} color="white" />
+            
+            <Animated.View style={[styles.collapsedContent, hiddenAppsStyle]}>
+              {hiddenApps && hiddenApps.length > 0 ? (
+                <ScrollView style={styles.hiddenAppsScrollContainer} nestedScrollEnabled={true} showsVerticalScrollIndicator={true}>
+                  {hiddenApps.map((pkg, index) => {
+                    const appData = getAppDataByPackage(pkg);
+                    if (!appData) return null;
+                    return (
+                      <View key={index} style={[styles.hiddenAppItem, index === 0 && { borderTopWidth: 0 }]}>
+                        <View style={styles.hiddenAppInfo}>
+                          {appData.icon && <Image source={{ uri: `data:image/png;base64,${appData.icon}` }} style={styles.hiddenAppIcon} resizeMode="contain" />}
+                          <Text style={styles.hiddenAppName} numberOfLines={1}>{appData.appName}</Text>
+                        </View>
+                        <TouchableOpacity onPress={() => unhideApp(pkg, shuffleApps)} style={styles.unhideBtn}>
+                          <Icon name="visibility" size={20} color="#FF453A" />
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              ) : (
+                <Text style={styles.noHiddenText}>No apps are currently hidden.</Text>
+              )}
+            </Animated.View>
+          </View>
+
+
+          {/* ========================================== */}
+          {/* SECTION 2: FOCUS & LOCKS                   */}
+          {/* ========================================== */}
+          <Text style={customStyles.sectionLabel}>FOCUS & LOCKS</Text>
+
+          {/* --- Phone Lock Section --- */}
+          <View style={styles.collapsibleContainer}>
+            <TouchableWithoutFeedback onPress={() => toggleSection('phoneLock')}>
+              <View style={styles.collapsibleHeaderContainer}>
+                <View style={styles.sectionTitleRow}>
+                  <Icon name="timer" size={22} color="#FF9F0A" />
+                  <Text style={styles.collapsibleHeader}>Time Lock</Text>
+                </View>
+                <Icon name={activeSection === 'phoneLock' ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={24} color="#8E8E93" />
+              </View>
+            </TouchableWithoutFeedback>
+            
+            <Animated.View style={[styles.collapsedContent, phoneLockStyle, { paddingBottom: 10 }]}>
+              <Text style={styles.switchLabel}>Lock Duration (minutes)</Text>
+              <TextInput 
+                style={[styles.input, { marginTop: 4, marginBottom: 8, paddingVertical: 10 }]} 
+                keyboardType="numeric" 
+                placeholder="e.g. 30" 
+                placeholderTextColor="#636366"
+                value={newLockedTime}
+                onChangeText={setNewLockedTime}
+              />
+              <TouchableOpacity style={[styles.primaryBtn, { paddingVertical: 10 }]} onPress={handleLockedTimeChange}>
+                <Text style={styles.primaryBtnText}>Set Lock Time</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+
+          {/* --- LeetCode Lock Section --- */}
+          <View style={styles.collapsibleContainer}>
+            <TouchableWithoutFeedback onPress={() => toggleSection('leetCode')}>
+              <View style={styles.collapsibleHeaderContainer}>
+                <View style={styles.sectionTitleRow}>
+                  <IonIcon name="code-slash" size={22} color="#30D158" />
+                  <Text style={styles.collapsibleHeader}>LeetCode Lock</Text>
+                </View>
+                <Icon name={activeSection === 'leetCode' ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={24} color="#8E8E93" />
+              </View>
+            </TouchableWithoutFeedback>
+            
+            <Animated.View style={[styles.collapsedContent, leetCodeStyle, { paddingBottom: 10 }]}>
+              {isLCLocked ? (
+                <View style={{ paddingTop: 5 }}>
+                  <Text style={[styles.switchLabel, { marginBottom: 15, textAlign: 'center', color: '#FF453A' }]}>
+                    Device is currently locked! 
+                  </Text>
+                  <TouchableOpacity 
+                    style={[styles.primaryBtn, { backgroundColor: '#30D158' }, isChecking && styles.primaryBtnDisabled]} 
+                    onPress={handleCheckUnlock} 
+                    disabled={isChecking}
+                  >
+                    {isChecking ? <ActivityIndicator color="#FFF" /> : <Text style={styles.primaryBtnText}>Check Status & Unlock</Text>}
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View>
+                  {lcUsername && !isEditingUsername ? (
+                    <View style={{ paddingTop: 5 }}>
+                      <Text style={[styles.switchLabel, { textAlign: 'center', marginBottom: 15 }]}>
+                        Linked to: <Text style={{ color: '#0A84FF', fontWeight: 'bold' }}>{lcUsername}</Text>
+                      </Text>
+                      <TouchableOpacity 
+                        style={[styles.primaryBtn, isChecking && styles.primaryBtnDisabled]} 
+                        onPress={handleLeetCodeLock} 
+                        disabled={isChecking}
+                      >
+                        {isChecking ? <ActivityIndicator color="#FFF" /> : <Text style={styles.primaryBtnText}>Lock Device Now</Text>}
+                      </TouchableOpacity>
+                      <TouchableOpacity style={{ marginTop: 10, padding: 10 }} onPress={() => setIsEditingUsername(true)}>
+                        <Text style={styles.secondaryBtnText}>Change Username</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <View style={{ paddingTop: 5 }}>
+                      <Text style={styles.switchLabel}>LeetCode Username</Text>
+                      <TextInput
+                        style={[styles.input, { marginTop: 8, marginBottom: 12, paddingVertical: 10 }]}
+                        placeholder="e.g. neetcode"
+                        placeholderTextColor="#636366"
+                        value={inputUsername}
+                        onChangeText={setInputUsername}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                      />
+                      <TouchableOpacity 
+                        style={[styles.primaryBtn, { paddingVertical: 10 }, isChecking && styles.primaryBtnDisabled]} 
+                        onPress={handleLeetCodeLock} 
+                        disabled={isChecking}
+                      >
+                        {isChecking ? <ActivityIndicator color="#FFF" /> : <Text style={styles.primaryBtnText}>Verify & Lock</Text>}
+                      </TouchableOpacity>
+                      {lcUsername && (
+                        <TouchableOpacity 
+                          style={{ marginTop: 10, padding: 10 }} 
+                          onPress={() => { setIsEditingUsername(false); setInputUsername(lcUsername); }}
+                        >
+                          <Text style={[styles.secondaryBtnText, styles.dangerText]}>Cancel</Text>
+                        </TouchableOpacity>
+                      )}
                     </View>
                   )}
                 </View>
               )}
-            />
             </Animated.View>
           </View>
+        </ScrollView>
 
-          {/* Hidden Apps Section */}
-          <View style={styles.collapsibleContainer}>
-            <TouchableWithoutFeedback onPress={() => setHiddenCollapsed(!hiddenCollapsed)}>
-              <View style={styles.collapsibleHeaderContainer}>
-                <Text style={styles.collapsibleHeader}>Hidden Apps</Text>
-                <Icon name={hiddenCollapsed ? "keyboard-arrow-down" : "keyboard-arrow-up"} size={24} color="white" />
-              </View>
-            </TouchableWithoutFeedback>
-            
-            {!hiddenCollapsed && (
-              <View style={[styles.collapsedContent, { paddingHorizontal: 15, paddingVertical: 5 }]}>
-                {hiddenApps && hiddenApps.length > 0 ? (
-                  <ScrollView 
-                    style={styles.hiddenAppsScrollContainer}
-                    nestedScrollEnabled={true} 
-                    showsVerticalScrollIndicator={true} 
-                  >
-                    {hiddenApps.map((pkg, index) => {
-                      const appData = getAppDataByPackage(pkg);
-                      if (!appData) return null;
+        {/* ========================================== */}
+        {/* STICKY BOTTOM LINKS                        */}
+        {/* ========================================== */}
+        <View style={customStyles.stickyFooter}>
+          <TouchableOpacity style={styles.link} onPress={() => Linking.openURL("https://www.linkedin.com/in/chetannn/")}>
+            <Text style={{ color: "#E5E5EA", fontSize: 15, fontWeight: "500" }}>LinkedIn</Text>
+            <IonIcon name="logo-linkedin" size={20} color="#0A84FF" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.link} onPress={() => Linking.openURL("https://github.com/chetannn-github/")}>
+            <Text style={{ color: "#E5E5EA", fontSize: 15, fontWeight: "500" }}>GitHub</Text>
+            <IonIcon name="logo-github" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
 
-                      return (
-                        <View key={index} style={styles.hiddenAppItem}>
-                          <View style={styles.hiddenAppInfo}>
-                            {appData.icon && (
-                              <Image
-                                source={{ uri: `data:image/png;base64,${appData.icon}` }}
-                                style={styles.hiddenAppIcon}
-                                resizeMode="contain"
-                              />
-                            )}
-                            <Text style={styles.hiddenAppName} numberOfLines={1}>
-                              {appData.appName}
-                            </Text>
-                          </View>
-                          
-                          <TouchableOpacity 
-                            onPress={() => unhideApp(pkg, shuffleApps)} 
-                            style={styles.unhideBtn}
-                          >
-                            <Icon name="close" size={20} color="#FF453A" />
-                          </TouchableOpacity>
-                        </View>
-                      );
-                    })}
-                  </ScrollView>
-                ) : (
-                  <Text style={styles.noHiddenText}>No hidden apps.</Text>
-                )}
-              </View>
-            )}
-          </View>
+      </SafeAreaView>
 
-          {/* LeetCode Lock Section */}
-          <View style={styles.collapsibleContainer}>
-            <TouchableWithoutFeedback onPress={() => setLeetCodeCollapsed(!leetCodeCollapsed)}>
-              <View style={styles.collapsibleHeaderContainer}>
-                <Text style={styles.collapsibleHeader}>LeetCode Lock</Text>
-                <Icon name={leetCodeCollapsed ? "keyboard-arrow-down" : "keyboard-arrow-up"} size={24} color="white" />
-              </View>
-            </TouchableWithoutFeedback>
-            
-            {!leetCodeCollapsed && (
-              <View style={[styles.collapsedContent, { paddingHorizontal: 15, paddingVertical: 15 }]}>
-                {isLCLocked ? (
-                  <View>
-                    <Text style={[styles.switchLabel, { marginBottom: 10 }]}>
-                      Device is currently locked! 
-                    </Text>
-                    <Button 
-                      title={isChecking ? "Checking LeetCode..." : "Check Status & Unlock"} 
-                      onPress={handleCheckUnlock} 
-                      color="#34C759" 
-                      disabled={isChecking}
-                    />
-                  </View>
-                ) : (
-                  <View>
-                    <Text style={styles.switchLabel}>Enter LeetCode Username:</Text>
-                    <TextInput
-                      style={[styles.input, { marginBottom: 10 }]}
-                      placeholder="Username"
-                      placeholderTextColor="#999"
-                      value={inputUsername}
-                      onChangeText={(val)=>(setInputUsername(val))}
-                      autoCapitalize="none"
-                    />
-                    <Button 
-                      title={isChecking ? "Verifying..." : "Verify & Lock"} 
-                      onPress={handleLeetCodeLock} 
-                      disabled={isChecking}
-                    />
-                  </View>
-                )}
-              </View>
-            )}
-          </View>
-
-          {/* Links */}
-          <View style={styles.linksContainer}>
-            <Text style={styles.link} onPress={() => Linking.openURL("https://www.linkedin.com/in/chetannn/")}>
-              LinkedIn {""}
-              <IonIcon name="logo-linkedin" size={20} color="#0A66C2" />
-            </Text>
-            <Text style={styles.link} onPress={() => Linking.openURL("https://github.com/chetannn-github/")}>
-              GitHub {""}
-              <IonIcon name="logo-github" size={20} color="red" />
-            </Text>
-          </View>
-        </SafeAreaView>
-      </GestureHandlerRootView>
-
-      {/* ABSOLUTE OVERLAY INSTEAD OF NATIVE MODAL */}
+      {/* --- ABSOLUTE OVERLAY INSTEAD OF NATIVE MODAL --- */}
       {alertConfig.visible && (
         <View style={[StyleSheet.absoluteFill, { zIndex: 99999, elevation: 99999 }]}>
           <Pressable style={customStyles.alertBackdrop} onPress={hideAlert}>
@@ -316,10 +345,7 @@ function SettingScreen() {
               <Text style={customStyles.alertMessage}>{alertConfig.message}</Text>
 
               <View style={customStyles.alertButtonRow}>
-                <TouchableOpacity
-                  style={customStyles.alertButton}
-                  onPress={hideAlert}
-                >
+                <TouchableOpacity style={customStyles.alertButton} onPress={hideAlert}>
                   <Text style={customStyles.alertConfirmText}>{alertConfig.confirmText}</Text>
                 </TouchableOpacity>
               </View>
@@ -332,6 +358,25 @@ function SettingScreen() {
 }
 
 const customStyles = StyleSheet.create({
+  sectionLabel: {
+    color: '#8E8E93',
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+    marginTop: 24,
+    marginBottom: 8,
+    marginLeft: 12,
+  },
+  stickyFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingTop: 15,
+    paddingBottom: 25, 
+    paddingHorizontal: 5,
+    backgroundColor: '#000', 
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.05)',
+  },
   alertBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.83)',
@@ -341,8 +386,8 @@ const customStyles = StyleSheet.create({
   alertContainer: {
     backgroundColor: '#1C1C1E', 
     width: '80%',
-    borderRadius: 15,
-    paddingTop: 25,
+    borderRadius: 16,
+    paddingTop: 24,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -351,27 +396,27 @@ const customStyles = StyleSheet.create({
   },
   alertTitle: {
     color: '#FFFFFF',
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   alertMessage: {
-    color: '#E5E5EA',
+    color: '#8E8E93',
     fontSize: 15,
     textAlign: 'center',
     paddingHorizontal: 20,
-    marginBottom: 25,
+    marginBottom: 24,
     lineHeight: 22,
   },
   alertButtonRow: {
     flexDirection: 'row',
-    borderTopWidth: 0.5,
-    borderTopColor: '#3A3A3C',
+    borderTopWidth: 1,
+    borderTopColor: '#2C2C2E',
     width: '100%',
   },
   alertButton: {
     flex: 1,
-    paddingVertical: 15,
+    paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
