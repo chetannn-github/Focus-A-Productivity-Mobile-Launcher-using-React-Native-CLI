@@ -1,5 +1,5 @@
-import React, { useState} from "react";
-import { View, Text,Image, TouchableWithoutFeedback, Linking, TextInput, Button, Pressable, ScrollView, SafeAreaView, FlatList, TouchableOpacity } from "react-native";
+import React, { useEffect, useState} from "react";
+import { View, Text,Image, TouchableWithoutFeedback, Linking, TextInput, Button, Pressable, ScrollView, SafeAreaView, FlatList, TouchableOpacity, Alert } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import IonIcon from "react-native-vector-icons/Ionicons";
 import Animated from "react-native-reanimated";
@@ -29,14 +29,56 @@ function SettingScreen() {
     switchTranslateX2
   } = useSetting();
 
-  const { showAppIcons, toggleAppIcons, selectedWallpaper, shuffleApps, toggleShuffleApps ,
-    changeWallpaper } = useSettingsStore();
+  const { 
+    showAppIcons, toggleAppIcons, selectedWallpaper, shuffleApps, toggleShuffleApps ,
+    changeWallpaper,
+    isLCLocked,            
+    lockWithLeetCode,
+    checkLCUnlockStatus,
+    lcUsername,
+    isChecking
+  } = useSettingsStore();
   const [hiddenCollapsed, setHiddenCollapsed] = useState(true);
   const { hiddenApps, unhideApp, masterApps } = useApps(); 
 
-  
   const getAppDataByPackage = (pkgName) => {
     return masterApps?.find(a => a.packageName === pkgName);
+  };
+
+  const [leetCodeCollapsed, setLeetCodeCollapsed] = useState(true);
+  const [inputUsername, setInputUsername] = useState(lcUsername);
+
+  useEffect(() => {
+    if (lcUsername && !inputUsername) {
+      setInputUsername(lcUsername);
+    }
+  }, [lcUsername]);
+
+  const handleLeetCodeLock = async () => {
+    const finalUsername = inputUsername.trim() || lcUsername;
+    
+    if (!finalUsername) {
+      Alert.alert("Hold up", "Please enter a LeetCode username.");
+      return;
+    }
+  
+    const success = await lockWithLeetCode(finalUsername);
+    
+    if (success) {
+      Alert.alert("Locked!", `Focus launcher is now locked to ${finalUsername} until you solve a problem!`);
+    } else {
+      Alert.alert("Error", "Could not verify username. Check network or spelling.");
+    }
+  };
+
+  const handleCheckUnlock = async () => {
+    const unlocked = await checkLCUnlockStatus();
+
+    if (unlocked) {
+      Alert.alert("Unlocked!", "Great job solving that problem! Apps restored.");
+    } else {
+      Alert.alert("Still Locked", "You haven't solved a new problem yet. Get back to coding!");
+    }
   };
 
   return (
@@ -185,6 +227,51 @@ function SettingScreen() {
               </ScrollView>
             ) : (
               <Text style={styles.noHiddenText}>No hidden apps.</Text>
+            )}
+          </View>
+        )}
+      </View>
+
+
+      <View style={styles.collapsibleContainer}>
+        <TouchableWithoutFeedback onPress={() => setLeetCodeCollapsed(!leetCodeCollapsed)}>
+          <View style={styles.collapsibleHeaderContainer}>
+            <Text style={styles.collapsibleHeader}>LeetCode Lock</Text>
+            <Icon name={leetCodeCollapsed ? "keyboard-arrow-down" : "keyboard-arrow-up"} size={24} color="white" />
+          </View>
+        </TouchableWithoutFeedback>
+        
+        {!leetCodeCollapsed && (
+          <View style={[styles.collapsedContent, { paddingHorizontal: 15, paddingVertical: 15 }]}>
+            {isLCLocked ? (
+              <View>
+                <Text style={[styles.switchLabel, { marginBottom: 10 }]}>
+                  Device is currently locked! 
+                </Text>
+                <Button 
+                  title={isChecking ? "Checking LeetCode..." : "Check Status & Unlock"} 
+                  onPress={handleCheckUnlock} 
+                  color="#34C759" 
+                  disabled={isChecking}
+                />
+              </View>
+            ) : (
+              <View>
+                <Text style={styles.switchLabel}>Enter LeetCode Username:</Text>
+                <TextInput
+                  style={[styles.input, { marginBottom: 10 }]}
+                  placeholder="Username"
+                  placeholderTextColor="#999"
+                  value={inputUsername}
+                  onChangeText={(val)=>(setInputUsername(val))}
+                  autoCapitalize="none"
+                />
+                <Button 
+                  title={isChecking ? "Verifying..." : "Verify & Lock"} 
+                  onPress={handleLeetCodeLock} 
+                  disabled={isChecking}
+                />
+              </View>
             )}
           </View>
         )}

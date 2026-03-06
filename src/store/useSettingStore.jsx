@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getLeetCodeSolved } from '../utils/leetcode';
 
 const useSettingsStore = create((set, get) => ({
   showAppIcons: true,
@@ -8,12 +9,21 @@ const useSettingsStore = create((set, get) => ({
   remainingTime: 0,
   selectedWallpaper: null,
 
+  isLCLocked: false,
+  lastLCCount: 0,
+  lcUsername: "",
+  isChecking: false,
+
   loadSettings: async () => {
     try {
       const storedShowAppIcons = await AsyncStorage.getItem('showAppIcons');
       const storedShuffleApps = await AsyncStorage.getItem('shuffleApps');
       const storedWallpaper = await AsyncStorage.getItem('selectedWallpaper');
       const storedLockedUntil = await AsyncStorage.getItem("lockedUntil");
+      const storedLcUsername = await AsyncStorage.getItem("lcUsername");
+      const storedIsLCLocked = await AsyncStorage.getItem("isLCLocked");
+      const storedLastLCCount = await AsyncStorage.getItem("LC");
+
       
       const lockedUntil = storedLockedUntil ? Number(storedLockedUntil) : 0;
 
@@ -21,7 +31,10 @@ const useSettingsStore = create((set, get) => ({
         showAppIcons: storedShowAppIcons !== null ? storedShowAppIcons === 'true' : true,
         shuffleApps: storedShuffleApps !== null ? storedShuffleApps === 'true' : false,
         selectedWallpaper: storedWallpaper ? storedWallpaper : null,
-        lockedUntil
+        lockedUntil,
+        lcUsername: storedLcUsername || "",
+        isLCLocked: storedIsLCLocked === "true",
+        lastLCCount: storedLastLCCount ? Number(storedLastLCCount) : 0,
       });
     } catch (e) {
       console.error("Error loading settings", e);
@@ -62,6 +75,61 @@ const useSettingsStore = create((set, get) => ({
   checkIsLocked: () => {
     const { lockedUntil } = get();
     return Date.now() < lockedUntil;
+  },
+
+  lockWithLeetCode: async (username) => {
+    set({ isChecking: true }); // Start loading
+    try {
+      const targetUsername = username || get().lcUsername;
+      const completedCount = await getLeetCodeSolved(targetUsername);      
+      
+      if (completedCount === undefined || completedCount === null) {
+         throw new Error("Invalid username or API Error");
+      }
+      
+      await AsyncStorage.setItem("LC", completedCount.toString());
+      await AsyncStorage.setItem("isLCLocked", "true");
+      await AsyncStorage.setItem("lcUsername", targetUsername);
+
+      set({ 
+        lastLCCount: completedCount, 
+        isLCLocked: true,
+        lcUsername: targetUsername,
+        isChecking: false // End loading
+      });
+      return true;
+    } catch (e) {
+      console.error("Failed to initiate LC Lock", e);
+      set({ isChecking: false });
+      return false; 
+    }
+  },
+
+  checkLCUnlockStatus: async () => {
+    set({ isChecking: true }); // Start loading
+    try {
+      const { lastLCCount, isLCLocked, lcUsername } = get();
+      if (!isLCLocked) {
+        set({ isChecking: false });
+        return true; 
+      }
+
+      const targetUsername = lcUsername;
+      const currentCount = await getLeetCodeSolved(targetUsername);
+
+      if (currentCount > lastLCCount) {
+        await AsyncStorage.setItem("isLCLocked", "false"); // Fixed typo 'fsse'
+        set({ isLCLocked: false, isChecking: false });
+        return true;
+      }
+      
+      set({ isChecking: false });
+      return false;
+    } catch (e) {
+      console.error("Error checking LC status", e);
+      set({ isChecking: false });
+      return false;
+    }
   },
 
   changeWallpaper: async (wallpaperUri) => {
