@@ -1,9 +1,10 @@
-import React, { useEffect, useContext } from 'react';
-import { Text, ActivityIndicator, Image, NativeEventEmitter, NativeModules, FlatList, SafeAreaView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useContext, useState } from 'react';
+import { Text, ActivityIndicator, Image, NativeEventEmitter, NativeModules, FlatList, SafeAreaView, TouchableOpacity, StyleSheet, Modal, Pressable, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SettingsContext } from '../Context/SettingsContext';
 import { AppListstyle } from '../Stylesheets/AppListStyle';
 import useApps from '../Hooks/useApps';
+import AppInfoModal from './AppInfoModal';
 
 
 const { InstalledApps } = NativeModules;
@@ -12,7 +13,19 @@ const { InstalledApps } = NativeModules;
 const AppsList = () => {
   const installedAppsEmitter = new NativeEventEmitter(InstalledApps);
   const { shuffleApps } = useContext(SettingsContext);
-  const {fetchApps, updateAppsList, openApp ,loading,apps,showAppIcons,originalApps} = useApps();
+  const { fetchApps, updateAppsList, openApp ,loading,apps,showAppIcons,originalApps, hideApp} = useApps();
+  const [selectedApp, setSelectedApp] = useState(null);
+  const [isSheetVisible, setIsSheetVisible] = useState(false);
+
+  const handleLongPress = (app) => {
+    setSelectedApp(app);
+    setIsSheetVisible(true);
+  };
+
+  const closeSheet = () => {
+    setIsSheetVisible(false);
+    setSelectedApp(null);
+  };
 
   useEffect(() => {
     fetchApps();
@@ -42,6 +55,7 @@ const AppsList = () => {
                 style={AppListstyle.appItem} 
                 activeOpacity={0.7}
                 onPress={() => openApp(item.packageName)}
+                onLongPress={() => handleLongPress(item)}
               >
                 {showAppIcons && item.icon && (
                   <Image
@@ -61,6 +75,7 @@ const AppsList = () => {
           <Text style={AppListstyle.noApps}>No apps found</Text>
         )}
       </SafeAreaView>
+      <AppInfoModal selectedApp={selectedApp} isSheetVisible={isSheetVisible} closeSheet={closeSheet} hideApp={hideApp}/>
     </GestureHandlerRootView>
   );
 };
