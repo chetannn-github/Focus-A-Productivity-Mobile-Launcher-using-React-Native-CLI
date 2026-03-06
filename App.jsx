@@ -1,23 +1,24 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-
-
 import { StatusBar } from "react-native";
-
 import { MainNavigator } from "./src/Navigation/MainNavigator";
-import { SettingsProvider } from "./src/Context/SettingsContext";
+import useSettingsStore from "./src/store/useSettingStore";
 
 
 const App = () => {
+  const loadSettings = useSettingsStore((state) => state.loadSettings);
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
   
   return (
-    <SettingsProvider>
+    <>
       <StatusBar backgroundColor="black" barStyle="light-content" />
         <NavigationContainer>
           <MainNavigator />
         </NavigationContainer>
-      
-    </SettingsProvider>
+    </>
   );
 };
 

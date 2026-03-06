@@ -1,26 +1,23 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, ImageBackground, StatusBar, SafeAreaView } from "react-native";
 
 import { useNavigation } from "@react-navigation/native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { SettingsContext } from "../Context/SettingsContext";
+
 import { formatTime, getRandomQuote } from "../Constants/functions";
 import { NativeModules } from 'react-native';
 import {  wallpapersObj } from "../Constants/wallpapers";
+import useSettingsStore from "../store/useSettingStore";
 
 const { InstalledApps } = NativeModules;
 
 export default function HomeScreen() {
    
     const [quote, setQuote] = useState(getRandomQuote());
-    const { selectedWallpaper} = useContext(SettingsContext);
+    const { selectedWallpaper} = useSettingsStore();
     const navigation = useNavigation();
     const wallpaperURI = parseInt(selectedWallpaper) + 1;
     const wallpaperURIString = wallpapersObj["wallpaper"+wallpaperURI+""];
-
-    // console.log(wallpaperURIString);
-    
-    
 
     const openPhoneApp = async () => {
         try {

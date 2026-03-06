@@ -1,10 +1,8 @@
-import { useContext } from "react";
-import { SettingsContext } from "../Context/SettingsContext";
 import LockScreen from "../Screens/LockScreen";
 import { DrawerNavigator } from "./DrawerNavigator";
+import useSettingsStore from "../store/useSettingStore";
 
 export const MainNavigator = () => {
-  const {lockedTime} = useContext(SettingsContext);
-
-  return lockedTime > 0 ? <LockScreen /> : <DrawerNavigator />;
+  const { remainingTime, checkIsLocked } = useSettingsStore();
+  return remainingTime > 0 || checkIsLocked() ? <LockScreen /> : <DrawerNavigator />;
 };

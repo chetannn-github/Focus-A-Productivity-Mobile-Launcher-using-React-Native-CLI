@@ -2,14 +2,16 @@ import { useContext, useEffect, useState } from "react";
 import { SettingsContext } from "../Context/SettingsContext";
 import { useDrawerStatus } from "@react-navigation/drawer";
 import { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import useSettingsStore from "../store/useSettingStore";
 
 function useSetting() {
-    const {lockedTime, setLockedTime ,showAppIcons,shuffleApps} = useContext(SettingsContext);
+    const {lockForMinutes, showAppIcons,shuffleApps} = useSettingsStore();
     const drawerStatus = useDrawerStatus();
     const [appListCollapsed, setAppListCollapsed] = useState(true);
     const [phoneLockCollapsed, setPhoneLockCollapsed] = useState(true);
     const [wallpaperCollapsed, setWallpaperCollapsed] = useState(true);
-    const [newLockedTime, setNewLockedTime] = useState(lockedTime.toString());
+     const [newLockedTime, setNewLockedTime] = useState("10");
+    
 
     const appListHeight = useSharedValue(0);
     const phoneLockHeight = useSharedValue(0);
@@ -32,7 +34,7 @@ function useSetting() {
     const handleLockedTimeChange = () => {
         const time = parseInt(newLockedTime, 10);
         if (!isNaN(time) && time >= 0) {
-          setLockedTime(time);
+          lockForMinutes(time);
         }
     }
 

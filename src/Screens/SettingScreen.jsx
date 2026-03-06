@@ -1,12 +1,13 @@
-import React, { useContext} from "react";
+import React, { useState} from "react";
 import { View, Text,Image, TouchableWithoutFeedback, Linking, TextInput, Button, Pressable, ScrollView, SafeAreaView, FlatList, TouchableOpacity } from "react-native";
-import { SettingsContext } from "../Context/SettingsContext";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import IonIcon from "react-native-vector-icons/Ionicons";
 import Animated from "react-native-reanimated";
 import { wallpapers } from "../Constants/wallpapers";
 import { styles } from "../Stylesheets/SettingScreenStyle";
 import useSetting from "../Hooks/useSetting";
+import useApps from "../store/useAppsStore";
+import useSettingsStore from "../store/useSettingStore";
 
 function SettingScreen() {
   const  {
@@ -28,10 +29,16 @@ function SettingScreen() {
     switchTranslateX2
   } = useSetting();
 
-  const { showAppIcons, toggleAppIcons, shuffleApps, toggleShuffleApps ,selectedWallpaper,
-    changeWallpaper} = useContext(SettingsContext);
- 
+  const { showAppIcons, toggleAppIcons, selectedWallpaper, shuffleApps, toggleShuffleApps ,
+    changeWallpaper } = useSettingsStore();
+  const [hiddenCollapsed, setHiddenCollapsed] = useState(true);
+  const { hiddenApps, unhideApp, masterApps } = useApps(); 
+
   
+  const getAppDataByPackage = (pkgName) => {
+    return masterApps?.find(a => a.packageName === pkgName);
+  };
+
   return (
     <SafeAreaView style={styles.SettingScreen}>
       <Text style={styles.header}>Focus Launcher</Text>
@@ -129,6 +136,58 @@ function SettingScreen() {
 
 </Animated.View>
 
+      </View>
+
+     <View style={styles.collapsibleContainer}>
+        <TouchableWithoutFeedback onPress={() => setHiddenCollapsed(!hiddenCollapsed)}>
+          <View style={styles.collapsibleHeaderContainer}>
+            <Text style={styles.collapsibleHeader}>Hidden Apps</Text>
+            <Icon name={hiddenCollapsed ? "keyboard-arrow-down" : "keyboard-arrow-up"} size={24} color="white" />
+          </View>
+        </TouchableWithoutFeedback>
+        
+        {!hiddenCollapsed && (
+          <View style={[styles.collapsedContent, { paddingHorizontal: 15, paddingVertical: 5 }]}>
+            {hiddenApps && hiddenApps.length > 0 ? (
+              <ScrollView 
+                style={styles.hiddenAppsScrollContainer}
+                nestedScrollEnabled={true} 
+                showsVerticalScrollIndicator={true} 
+              >
+                {hiddenApps.map((pkg, index) => {
+                  const appData = getAppDataByPackage(pkg);
+                  if (!appData) return null;
+
+                  return (
+                    <View key={index} style={styles.hiddenAppItem}>
+                      <View style={styles.hiddenAppInfo}>
+                        {appData.icon && (
+                          <Image
+                            source={{ uri: `data:image/png;base64,${appData.icon}` }}
+                            style={styles.hiddenAppIcon}
+                            resizeMode="contain"
+                          />
+                        )}
+                        <Text style={styles.hiddenAppName} numberOfLines={1}>
+                          {appData.appName}
+                        </Text>
+                      </View>
+                      
+                      <TouchableOpacity 
+                        onPress={() => unhideApp(pkg, shuffleApps)} 
+                        style={styles.unhideBtn}
+                      >
+                        <Icon name="close" size={20} color="#FF453A" />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            ) : (
+              <Text style={styles.noHiddenText}>No hidden apps.</Text>
+            )}
+          </View>
+        )}
       </View>
 
       {/* Links */}

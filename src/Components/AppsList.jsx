@@ -1,10 +1,10 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, ActivityIndicator, Image, NativeEventEmitter, NativeModules, FlatList, SafeAreaView, TouchableOpacity, StyleSheet, Modal, Pressable, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SettingsContext } from '../Context/SettingsContext';
 import { AppListstyle } from '../Stylesheets/AppListStyle';
-import useApps from '../Hooks/useApps';
+import useApps from '../store/useAppsStore';
 import AppInfoModal from './AppInfoModal';
+import useSettingsStore from '../store/useSettingStore';
 
 
 const { InstalledApps } = NativeModules;
@@ -12,11 +12,12 @@ const { InstalledApps } = NativeModules;
 
 const AppsList = () => {
   const installedAppsEmitter = new NativeEventEmitter(InstalledApps);
-  const { shuffleApps } = useContext(SettingsContext);
-  const { fetchApps, updateAppsList, openApp ,loading,apps,showAppIcons,originalApps, hideApp} = useApps();
+  const { shuffleApps } = useSettingsStore();
+  const { fetchApps, openApp, loading, apps, hideApp } = useApps();
   const [selectedApp, setSelectedApp] = useState(null);
   const [isSheetVisible, setIsSheetVisible] = useState(false);
-
+  const { showAppIcons } = useSettingsStore();
+  
   const handleLongPress = (app) => {
     setSelectedApp(app);
     setIsSheetVisible(true);
@@ -28,16 +29,14 @@ const AppsList = () => {
   };
 
   useEffect(() => {
-    fetchApps();
+    fetchApps(shuffleApps);
     const subscription = installedAppsEmitter.addListener('appListUpdated', () => {
-      fetchApps();
+      fetchApps(shuffleApps);
     });
     return () => subscription.remove();
-  }, []);
-
-  useEffect(() => {
-    if(shuffleApps) updateAppsList(originalApps);
   }, [shuffleApps]);
+
+
 
 
   return (
