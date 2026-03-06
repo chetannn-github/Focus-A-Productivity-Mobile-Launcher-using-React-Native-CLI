@@ -3,16 +3,16 @@ import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Pressable 
 import { motivationalQuotes } from "../Constants/quotes";
 import { styles } from "../Stylesheets/LockScreenStyle";
 import useSettingsStore from "../store/useSettingStore";
+import Icon from "react-native-vector-icons/Ionicons";
 
 const LockScreen = () => {
   const { 
-    lockedUntil, 
     remainingTime, 
-    setRemainingTime, 
     isLCLocked, 
     checkLCUnlockStatus, 
     isChecking,
     questionsToSolve,
+    lockedUntil
   } = useSettingsStore();
   
   const [quote, setQuote] = useState("");
@@ -20,21 +20,18 @@ const LockScreen = () => {
     visible: false, 
     title: '', 
     message: '', 
-    confirmText: 'OK',
-    type: 'error'
+    confirmText: 'OK'
   });
 
-  const showAlert = (title, message, confirmText = "OK", type = "error") => {
-    setAlertConfig({ visible: true, title, message, confirmText, type });
+  const showAlert = (title, message, confirmText = "OK") => {
+    setAlertConfig({ visible: true, title, message, confirmText });
   };
 
-  const hideAlert = () => {
-    setAlertConfig((prev) => ({ ...prev, visible: false }));
-  };
+  const hideAlert = () => setAlertConfig((prev) => ({ ...prev, visible: false }));
 
   useEffect(() => {
     if (!isLCLocked) {
-      const interval = setInterval(setRemainingTime, 1000);
+      const interval = setInterval(() => useSettingsStore.getState().setRemainingTime(), 1000);
       return () => clearInterval(interval);
     }
   }, [lockedUntil, isLCLocked]);
@@ -46,87 +43,81 @@ const LockScreen = () => {
 
   const handleCheckLeetCode = async () => {
     const status = await checkLCUnlockStatus();
-    
-    // Safety check in case status is returned as boolean from older store version
     const isUnlocked = typeof status === 'object' ? status.unlocked : status;
     const solved = typeof status === 'object' ? status.solved : 0;
     const needed = typeof status === 'object' ? status.needed : questionsToSolve;
 
     if (isUnlocked) {
-      showAlert(
-        "Freedom Achieved! 🚀", 
-        `Awesome work! You crushed those ${needed} LeetCode problem(s). Your apps are now unlocked.`, 
-        "Let's Go!", 
-        "success"
-      );
+      showAlert("Unlocked", `Mission accomplished. Your apps are back.`, "Enter");
     } else {
-      showAlert(
-        "Keep Grinding! 💻", 
-        `You've solved ${solved} out of ${needed} required problem${needed > 1 ? "s" : ""}.\n\nHead back to LeetCode and finish the job!`, 
-        "Back to Code", 
-        "error"
-      );
+      showAlert("Still Locked", `${solved}/${needed} solved. Don't give up now.`, "Return");
     }
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: "#000000" }}>
+      <View style={[styles.container, { justifyContent: 'center', backgroundColor: '#000000' }]}>
        
         {!isLCLocked ? (
-          <Text style={styles.timer}>
-            {Math.floor(remainingTime / 60)}:{String(remainingTime % 60).padStart(2, "0")}
-          </Text>
+          <View style={{ alignItems: 'center' }}>
+            <Text style={[styles.timer, { color: '#888888', fontSize: 48, fontWeight: '200' }]}>
+              {Math.floor(remainingTime / 60)}:{String(remainingTime % 60).padStart(2, "0")}
+            </Text>
+            <Text style={{ color: '#555555', fontSize: 14, letterSpacing: 2, marginTop: 5 }}>TIME LOCK ACTIVE</Text>
+          </View>
         ) : (
           <View style={{ alignItems: 'center' }}>
-            <Text style={[styles.timer, { fontSize: 32 }]}>
-              Locked for Focus
+            <Icon name="code-slash" size={32} color="#666666" style={{ marginBottom: 15 }} />
+            <Text style={{ fontSize: 36, color: '#999999', fontWeight: '300', letterSpacing: 4 }}>
+              LOCKED
             </Text>
-            <Text style={{ color: '#0A84FF', fontSize: 16, fontWeight: '600', marginTop: 10 }}>
-              Goal: Solve {questionsToSolve} Problem{questionsToSolve > 1 ? "s" : ""}
+            <Text style={{ color: '#666666', fontSize: 15, marginTop: 10, letterSpacing: 1.5 }}>
+              GOAL: {questionsToSolve} PROBLEMS
             </Text>
           </View>
         )}
 
-        <Text style={styles.message}>Your phone is locked.</Text>
-        <Text style={styles.quote}>{quote}</Text>
+        {/* QUOTE SECTION - BIGGER & BRIGHTER */}
+        <View style={{ marginTop: 70, paddingHorizontal: 35 }}>
+          <Text style={{ 
+            color: '#AAAAAA', // Light grey (Readable but not white)
+            fontStyle: 'italic', 
+            textAlign: 'center', 
+            fontSize: 18, // Bigger size
+            lineHeight: 28, 
+            fontWeight: '300'
+          }}>
+            "{quote}"
+          </Text>
+        </View>
 
-    
+        {/* BUTTON - BRIGHTER BORDER & TEXT */}
         {isLCLocked && (
           <TouchableOpacity 
-            style={[customStyles.checkButton, isChecking && customStyles.buttonDisabled]} 
+            style={[customStyles.actionButton, isChecking && { opacity: 0.5 }]} 
             onPress={handleCheckLeetCode}
             disabled={isChecking}
+            activeOpacity={0.7}
           >
             {isChecking ? (
-              <ActivityIndicator color="#000" />
+              <ActivityIndicator color="#888888" size="small" />
             ) : (
-              <Text style={customStyles.checkButtonText}>Check LeetCode Status</Text>
+              <Text style={customStyles.actionButtonText}>CHECK PROGRESS</Text>
             )}
           </TouchableOpacity>
         )}
       </View>
 
+      {/* --- ALERT OVERLAY --- */}
       {alertConfig.visible && (
         <View style={[StyleSheet.absoluteFill, { zIndex: 99999, elevation: 99999 }]}>
           <Pressable style={customStyles.alertBackdrop} onPress={hideAlert}>
-            <Pressable style={customStyles.alertContainer} onPress={() => {}}>
+            <Pressable style={customStyles.alertContainer}>
               <Text style={customStyles.alertTitle}>{alertConfig.title}</Text>
               <Text style={customStyles.alertMessage}>{alertConfig.message}</Text>
-
-              <View style={customStyles.alertButtonRow}>
-                <TouchableOpacity
-                  style={customStyles.alertButton}
-                  onPress={hideAlert}
-                >
-                  <Text style={[
-                    customStyles.alertConfirmText, 
-                    { color: alertConfig.type === 'success' ? '#34C759' : '#FF453A' }
-                  ]}>
-                    {alertConfig.confirmText}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity style={customStyles.alertBtn} onPress={hideAlert}>
+                <Text style={customStyles.alertBtnText}>{alertConfig.confirmText}</Text>
+              </TouchableOpacity>
             </Pressable>
           </Pressable>
         </View>
@@ -136,76 +127,62 @@ const LockScreen = () => {
 };
 
 const customStyles = StyleSheet.create({
-  checkButton: {
-    backgroundColor: '#34C759', 
+  actionButton: {
+    backgroundColor: 'transparent', 
     paddingVertical: 14,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-    marginTop: 40,
-    minWidth: 200,
+    paddingHorizontal: 35,
+    borderRadius: 30, 
+    marginTop: 60,
+    borderWidth: 1,
+    borderColor: '#333333', // Subtle but visible border
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
   },
-  buttonDisabled: {
-    backgroundColor: '#8E8E93', 
+  actionButtonText: {
+    color: '#888888',
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 2,
   },
-  checkButtonText: {
-    color: '#000',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  // --- ALERT STYLES ---
   alertBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(0, 0, 0, 0.9)', 
     justifyContent: 'center',
     alignItems: 'center',
   },
   alertContainer: {
-    backgroundColor: '#1C1C1E', 
+    backgroundColor: '#0D0D0D', 
     width: '80%',
-    borderRadius: 18,
+    borderRadius: 20,
     paddingTop: 25,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 15,
-    elevation: 24,
+    borderWidth: 1,
+    borderColor: '#222222',
   },
   alertTitle: {
-    color: '#FFFFFF',
-    fontSize: 20,
+    color: '#CCCCCC',
+    fontSize: 19,
     fontWeight: 'bold',
     marginBottom: 10,
   },
   alertMessage: {
-    color: '#E5E5EA',
+    color: '#888888',
     fontSize: 15,
     textAlign: 'center',
     paddingHorizontal: 20,
     marginBottom: 25,
     lineHeight: 22,
   },
-  alertButtonRow: {
-    flexDirection: 'row',
-    borderTopWidth: 0.5,
-    borderTopColor: '#3A3A3C',
+  alertBtn: {
+    borderTopWidth: 1,
+    borderTopColor: '#222222',
     width: '100%',
-  },
-  alertButton: {
-    flex: 1,
-    paddingVertical: 16,
+    paddingVertical: 18,
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  alertConfirmText: {
-    fontSize: 17,
+  alertBtnText: {
+    fontSize: 16,
     fontWeight: 'bold',
+    color: '#AAAAAA',
   },
 });
 
