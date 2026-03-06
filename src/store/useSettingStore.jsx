@@ -95,7 +95,7 @@ const useSettingsStore = create((set, get) => ({
         lastLCCount: completedCount, 
         isLCLocked: true,
         lcUsername: targetUsername,
-        isChecking: false // End loading
+        isChecking: false 
       });
       return true;
     } catch (e) {
@@ -118,7 +118,7 @@ const useSettingsStore = create((set, get) => ({
       const currentCount = await getLeetCodeSolved(targetUsername);
 
       if (currentCount > lastLCCount) {
-        await AsyncStorage.setItem("isLCLocked", "false"); // Fixed typo 'fsse'
+        await AsyncStorage.setItem("isLCLocked", "false");
         set({ isLCLocked: false, isChecking: false });
         return true;
       }
