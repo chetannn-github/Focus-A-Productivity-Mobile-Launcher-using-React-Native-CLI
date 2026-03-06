@@ -1,94 +1,125 @@
-import { View, Text, Modal, Pressable, TouchableOpacity, StyleSheet } from 'react-native'
-import { Linking, Platform, Alert } from 'react-native';
-import React from 'react'
-import useApps from '../Hooks/useApps';
+import React, { useState } from 'react';
+import { View, Text, Modal, Pressable, TouchableOpacity, StyleSheet, Platform, Linking, Alert } from 'react-native';
 
-const AppInfoModal = ({isSheetVisible, selectedApp, closeSheet, hideApp}) => {
-   
+const AppInfoModal = ({ isSheetVisible, selectedApp, closeSheet, hideApp }) => {
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    onConfirm: () => {},
+  });
 
-// App Info kholne ke liye
-const openAppInfo = (packageName) => {
-  if (Platform.OS === 'android') {
-    // Android specific Intent for App Settings
-    Linking.openSettings(); 
-    // Note: Direct App Info page ke liye aap 'intent-filter' use kar sakte hain 
-    // but openSettings() sabse safe aur easy native method hai.
-  }
-  closeSheet();
-};
+  const hideAlert = () => {
+    setAlertConfig((prev) => ({ ...prev, visible: false }));
+  };
+  const openAppInfo = () => {
+    if (Platform.OS === 'android') {
+      Linking.openSettings();
+    }
+    closeSheet();
+  };
 
-// Uninstall prompt kholne ke liye
-const uninstallApp = (packageName) => {
-  if (Platform.OS === 'android') {
-    Linking.openURL(`package:${packageName}`).catch(err => 
-      Alert.alert("Error", err)
-    );
-  } else {
-    Alert.alert("Notice", "Uninstalling is only supported on Android via this method.");
-  }
-  closeSheet();
-};
+  // Uninstall logic
+  const uninstallApp = (packageName) => {
+    hideAlert();
+    if (Platform.OS === 'android') {
+      Linking.openURL(`package:${packageName}`).catch(err =>
+        Alert.alert("Error", String(err))
+      );
+    }
+    closeSheet();
+  };
 
-const handleHideClick = () => {
+  
+  const handleHideClick = () => {
+    hideAlert();
     hideApp(selectedApp.packageName);
     closeSheet();
-}
-    
+  };
+
   return (
-   <Modal
-  animationType="slide"
-  transparent={true}
-  visible={isSheetVisible}
-  onRequestClose={closeSheet}
->
-  <Pressable style={styles.backdrop} onPress={closeSheet}>
-    {/* Screen ke baki hisse par click karne se band ho jayega */}
+    <>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isSheetVisible}
+        onRequestClose={closeSheet}
+      >
+        <Pressable style={styles.backdrop} onPress={closeSheet}>
+          <View style={styles.sheetContainer}>
+            <View style={styles.handle} />
+
+            <Text style={styles.sheetTitle}>{selectedApp?.appName}</Text>
+            <Text style={styles.pkgText}>{selectedApp?.packageName}</Text>
+
+            <View style={styles.optionsWrapper}>
+              <TouchableOpacity
+                style={styles.sheetOption}
+                onPress={openAppInfo}
+              >
+                <Text style={styles.optionText}>ℹ️  App Info</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.sheetOption, { borderBottomWidth: 0 }]}
+                onPress={() => {
+                  setAlertConfig({
+                    visible: true,
+                    title: "Hide App",
+                    message: `Are you sure you want to hide '${selectedApp?.appName}' from the list?`,
+                    confirmText: "Hide",
+                    onConfirm: handleHideClick,
+                  });
+                }}
+              >
+                <Text style={styles.optionText}>👁️‍🗨️  Hide App</Text>
+              </TouchableOpacity>
+            </View>
+
+
+            <TouchableOpacity style={styles.cancelBtn} onPress={closeSheet}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
+
     
-    <View style={styles.sheetContainer}>
-      {/* Visual Indicator (Top Bar) */}
-      <View style={styles.handle} />
-      
-      <Text style={styles.sheetTitle}>{selectedApp?.appName}</Text>
-      <Text style={styles.pkgText}>{selectedApp?.packageName}</Text>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={alertConfig.visible}
+        onRequestClose={hideAlert}
+      >
+        <Pressable style={styles.alertBackdrop} onPress={hideAlert}>
+          <Pressable style={styles.alertContainer}>
+            <Text style={styles.alertTitle}>{alertConfig.title}</Text>
+            <Text style={styles.alertMessage}>{alertConfig.message}</Text>
 
-      <View style={styles.optionsWrapper}>
-        {/* APP INFO BUTTON */}
-        <TouchableOpacity 
-          style={styles.sheetOption} 
-          onPress={() => openAppInfo(selectedApp?.packageName)}
-        >
-          <Text style={styles.optionText}>ℹ️  App Info</Text>
-        </TouchableOpacity>
+            <View style={styles.alertButtonRow}>
+              {/* Alert Cancel Button */}
+              <TouchableOpacity
+                style={[styles.alertButton, styles.alertCancelButton]}
+                onPress={hideAlert}
+              >
+                <Text style={styles.alertCancelText}>Cancel</Text>
+              </TouchableOpacity>
 
-
-        {/* HIDE APP BUTTON (Last item, so borderBottomWidth: 0) */}
-        <TouchableOpacity 
-          style={[styles.sheetOption, { borderBottomWidth: 0 }]} 
-          onPress={() => {
-            Alert.alert(
-              "Hide App",
-              "Are you sure you want to hide this app from the list?",
-              [
-                { text: "Cancel", style: "cancel" },
-                { text: "Hide", onPress: handleHideClick }
-              ]
-            );
-          }}
-        >
-          <Text style={styles.optionText}>👁️‍🗨️  Hide App</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* CANCEL BUTTON */}
-      <TouchableOpacity style={styles.cancelBtn} onPress={closeSheet}>
-        <Text style={styles.cancelText}>Cancel</Text>
-      </TouchableOpacity>
-    </View>
-  </Pressable>
-</Modal>
-  )
-}
-
+              {/* Alert Confirm Button */}
+              <TouchableOpacity
+                style={styles.alertButton}
+                onPress={alertConfig.onConfirm}
+              >
+                <Text style={styles.alertConfirmText}>{alertConfig.confirmText}</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </>
+  );
+};
 
 const styles = StyleSheet.create({
   backdrop: {
@@ -140,13 +171,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#2C2C2E', // Subtle separator
+    borderBottomColor: '#2C2C2E', 
   },
   optionText: {
-    color: '#E5E5EA', // Off-white for less eye strain
+    color: '#E5E5EA',
     fontSize: 17,
     fontWeight: '500',
-    marginLeft: 5, // Icon aur text ke beech thoda space
+    marginLeft: 5,
   },
   cancelBtn: {
     backgroundColor: '#1C1C1E',
@@ -155,11 +186,68 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelText: {
-    color: '#0A84FF', // Standard iOS blue accent for cancel
+    color: '#0A84FF',
     fontSize: 18,
     fontWeight: '600',
   },
+  alertBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.83)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  alertContainer: {
+    backgroundColor: '#1C1C1E', 
+    width: '80%',
+    borderRadius: 15,
+    paddingTop: 25,
+    alignItems: 'center',
+    elevation: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+  },
+  alertTitle: {
+    color: '#FFFFFF',
+    fontSize: 19,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  alertMessage: {
+    color: '#E5E5EA',
+    fontSize: 15,
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 25,
+    lineHeight: 22,
+  },
+  alertButtonRow: {
+    flexDirection: 'row',
+    borderTopWidth: 0.5,
+    borderTopColor: '#3A3A3C',
+    width: '100%',
+  },
+  alertButton: {
+    flex: 1,
+    paddingVertical: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  alertCancelButton: {
+    borderRightWidth: 0.5,
+    borderRightColor: '#3A3A3C',
+  },
+  alertCancelText: {
+    color: '#0A84FF',
+    fontSize: 17,
+    fontWeight: '400',
+  },
+  alertConfirmText: {
+    color: '#FF453A', 
+    fontSize: 17,
+    fontWeight: 'bold',
+  },
 });
 
-
-export default AppInfoModal
+export default AppInfoModal;
