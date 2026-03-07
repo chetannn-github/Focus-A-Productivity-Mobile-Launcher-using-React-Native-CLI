@@ -12,8 +12,6 @@ const LetterItem = memo(({ letter, animatedValue, isActive }) => {
     inputRange: [0, 1],
     outputRange: [1, 2.3], 
   });
-
-
   const activeOpacity = animatedValue.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0, 0, 1],
@@ -39,7 +37,7 @@ const AlphabetNavigator = ({ processedApps, flatListRef }) => {
   const currentLetterRef = useRef(null);
   const animatedValues = useRef(ALPHABET.map(() => new Animated.Value(0))).current;
   const lastTouchTime = useRef(0);
-  const THROTTLE_MS = 20;
+  const THROTTLE_MS = 12; 
 
   const letterIndices = useMemo(() => {
     const indices = {};
@@ -51,9 +49,9 @@ const AlphabetNavigator = ({ processedApps, flatListRef }) => {
     return indices;
   }, [processedApps]);
 
-  const processTouch = useCallback((pageY) => {
+  const processTouch = useCallback((pageY, isInitial = false) => {
     const now = Date.now();
-    if (now - lastTouchTime.current < THROTTLE_MS) return;
+    if (!isInitial && now - lastTouchTime.current < THROTTLE_MS) return;
     lastTouchTime.current = now;
 
     const { y: barTop, height: bHeight } = barLayout.current;
@@ -84,7 +82,8 @@ const AlphabetNavigator = ({ processedApps, flatListRef }) => {
       onMoveShouldSetPanResponderCapture: () => true,
       onPanResponderGrant: (evt) => {
         setIsSliding(true);
-        processTouch(evt.nativeEvent.pageY);
+        // 🔥 Instant bypass on click
+        processTouch(evt.nativeEvent.pageY, true);
       },
       onPanResponderMove: (evt) => {
         processTouch(evt.nativeEvent.pageY);
@@ -116,7 +115,7 @@ const AlphabetNavigator = ({ processedApps, flatListRef }) => {
       return Animated.spring(animatedValues[index], {
         toValue: targetValue,
         useNativeDriver: true,
-        tension: 50, 
+        tension: 150, 
         friction: 12,
       });
     });
@@ -175,7 +174,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF', 
     fontWeight: '900',
   },
- 
   minimalDot: {
     position: 'absolute',
     width: 12,
