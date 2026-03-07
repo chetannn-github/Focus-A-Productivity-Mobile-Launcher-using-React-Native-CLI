@@ -46,11 +46,15 @@ const useSettingsStore = create((set, get) => ({
       const lockedUntil = storedLockedUntil ? Number(storedLockedUntil) : 0;
       const storedFavLanguage = await AsyncStorage.getItem('favLanguage');
 
+      const now = Date.now();
+      const initialRemaining = Math.max(0, Math.floor((lockedUntil - now) / 1000));
+
       set({
         showAppIcons: storedShowAppIcons !== null ? storedShowAppIcons === 'true' : true,
         shuffleApps: storedShuffleApps !== null ? storedShuffleApps === 'true' : false,
         selectedWallpaper: storedWallpaper ? storedWallpaper : null,
         lockedUntil,
+        remainingTime: initialRemaining,
         lcUsername: storedLcUsername || "",
         isLCLocked: storedIsLCLocked === "true",
         lastLCCount: storedLastLCCount ? Number(storedLastLCCount) : 0,
@@ -90,7 +94,7 @@ const useSettingsStore = create((set, get) => ({
   setRemainingTime : () => {
     const now = Date.now();
     const lockTime = new Date(get().lockedUntil).getTime();
-    const diff = Math.floor((lockTime - now)/1000);
+    const diff = Math.max(0,Math.floor((lockTime - now)/1000));
     set ({remainingTime : diff})
   },
 
