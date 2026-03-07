@@ -3,7 +3,7 @@ import {
   NativeModules, AppState, View, Text, TouchableOpacity, 
   StyleSheet, ActivityIndicator, TextInput, KeyboardAvoidingView, 
   Platform, Keyboard, Modal, TouchableWithoutFeedback, 
-  SafeAreaView
+  SafeAreaView 
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import LockScreen from "../Screens/LockScreen";
@@ -18,20 +18,29 @@ export const MainNavigator = () => {
   const [errorModal, setErrorModal] = useState(false);
   const [isSkipped, setIsSkipped] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  
+  // FIX: Hydration state track karne ke liye
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const { 
-    remainingTime, 
-    isLCLocked, 
-    lockedUntil, 
-    lcUsername, 
-    verifyAndSetLCUsername, 
-    isChecking 
+    remainingTime, isLCLocked, lockedUntil, 
+    lcUsername, verifyAndSetLCUsername, isChecking 
   } = useSettingsStore();
   
-  const isTimeLocked = remainingTime > 0 || Date.now() < lockedUntil;
-  const isCurrentlyLocked = isLCLocked || isTimeLocked;
+  const isCurrentlyLocked = isLCLocked || (remainingTime > 0 || Date.now() < lockedUntil);
 
-  // 1. Permissions Check
+  // Zustand persistence check
+  useEffect(() => {
+    // Agar useSettingsStore mein koi custom hydration logic hai toh wo yahan use karo.
+    // Warna ye simple timeout temporary flicker ko rok lega.
+    // Ideal way is to use onRehydrateStorage in Zustand.
+    const hydrateTimer = setTimeout(() => {
+      setIsHydrated(true);
+    }, 100); // 100ms is usually enough for AsyncStorage to load
+
+    return () => clearTimeout(hydrateTimer);
+  }, []);
+
   useEffect(() => {
     const checkAllPerms = async () => {
       if (OverlayModule && ScreenLock) {
@@ -41,165 +50,139 @@ export const MainNavigator = () => {
       }
     };
     checkAllPerms();
-    const subscription = AppState.addEventListener('change', nextAppState => {
-      if (nextAppState === 'active') checkAllPerms();
-    });
-    return () => subscription.remove();
+    const sub = AppState.addEventListener('change', state => state === 'active' && checkAllPerms());
+    return () => sub.remove();
   }, []);
-
-  // 2. Escape Prevention
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', nextAppState => {
-      if (isCurrentlyLocked && (nextAppState === 'background' || nextAppState === 'inactive')) {
-        if (OverlayModule && perms.overlay) {
-          OverlayModule.bringToFront();
-        }
-      }
-    });
-    return () => subscription.remove();
-  }, [isCurrentlyLocked, perms.overlay]);
 
   const handleVerify = async () => {
     if (!tempUsername.trim()) return;
+    Keyboard.dismiss();
     const result = await verifyAndSetLCUsername(tempUsername.trim());
+    
     if (!result.success) {
-      setErrorModal(true);
+       setErrorModal(true);
     }
   };
 
-  if (perms.overlay === null || perms.admin === null) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="small" color="#FFF" />
-      </View>
-    );
+  const skipSetup = () => {
+    Keyboard.dismiss();
+    setIsSkipped(true);
+  };
+
+  // --- 0. LOADING STATE (Hydration + Permissions) ---
+  if (!isHydrated || perms.overlay === null || perms.admin === null) {
+      return (
+          <View style={{flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center'}}>
+              <ActivityIndicator color="#FFF" />
+          </View>
+      )
   }
 
-  // --- STEP 1: SYSTEM SETUP ---
+  // --- 1. STEP 1: SYSTEM SETUP (Permissions) ---
   if (!perms.overlay || !perms.admin) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.headerSection}>
-          <View style={styles.iconCircle}>
+          <View style={[styles.iconCircle, { backgroundColor: 'rgba(10, 132, 255, 0.1)' }]}>
             <Icon name="shield-checkmark-outline" size={32} color="#0A84FF" />
           </View>
           <Text style={styles.title}>System Setup</Text>
           <Text style={styles.subtitle}>
-            Enable these core settings to allow the launcher to protect your focus effectively.
+            Focus needs these system permissions to protect your sessions.
           </Text>
         </View>
 
         <View style={styles.cardContainer}>
-          <PermissionRow 
-            title="Screen Overlay" 
-            desc="Allows the launcher to block distracting apps." 
-            active={perms.overlay} 
-            icon="layers-outline"
-            onPress={() => !perms.overlay && OverlayModule.requestPermission()} 
-          />
+          <PermissionRow title="Screen Overlay" active={perms.overlay} onPress={() => OverlayModule.requestPermission()} />
           <View style={styles.separator} />
-          <PermissionRow 
-            title="Accessibility" 
-            desc="Enables the double-tap to sleep feature." 
-            active={perms.admin} 
-            icon="hand-left-outline"
-            onPress={() => !perms.admin && ScreenLock.requestPermission()} 
-          />
+          <PermissionRow title="Accessibility" active={perms.admin} onPress={() => ScreenLock.requestPermission()} />
         </View>
       </SafeAreaView>
     );
   }
 
-  // --- STEP 2: LEETCODE SYNC ---
+  // --- 2. STEP 2: LEETCODE SYNC ---
   if (!lcUsername && !isSkipped) {
     const isButtonDisabled = tempUsername.trim().length === 0 || isChecking;
 
     return (
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <SafeAreaView style={styles.container}>
-          <KeyboardAvoidingView 
-            behavior={Platform.OS === "ios" ? "padding" : "height"} 
-            style={{ flex: 1 }}
-          >
+          <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+            
             <View style={styles.headerSection}>
               <View style={[styles.iconCircle, { backgroundColor: 'rgba(255, 159, 10, 0.1)' }]}>
                 <Icon name="code-slash-outline" size={32} color="#FF9F0A" />
               </View>
-              <Text style={styles.title}>LeetCode Sync</Text>
+              <Text style={styles.title}>Link Profile</Text>
               <Text style={styles.subtitle}>
-                Connect your profile to use coding challenges as a way to unlock your apps.
+                Sync your LeetCode account to use challenges as app locks.
               </Text>
             </View>
 
-            {/* Input with @ Icon */}
             <View style={[styles.inputWrapper, isInputFocused && styles.inputFocused]}>
-              <Icon 
-                name="at-outline" 
-                size={20} 
-                color={isInputFocused ? "#FF9F0A" : "#444"} 
-                style={{ marginRight: 10 }} 
-              />
+              <Icon name="at" size={20} color={isInputFocused ? "#FFF" : "#666"} style={{marginRight: 10}} />
               <TextInput 
                 style={styles.input}
-                placeholder="Username"
-                placeholderTextColor="#444"
+                placeholder="LeetCode Username"
+                placeholderTextColor="#666"
                 value={tempUsername}
                 onChangeText={setTempUsername}
                 onFocus={() => setIsInputFocused(true)}
                 onBlur={() => setIsInputFocused(false)}
                 autoCapitalize="none"
                 editable={!isChecking}
-                selectionColor="#FF9F0A"
+                selectionColor="#FFF"
               />
             </View>
 
             <TouchableOpacity 
               style={[
                 styles.mainBtn, 
-                isButtonDisabled && styles.mainBtnDisabled
+                isButtonDisabled && !isChecking && styles.mainBtnDisabled,
+                isChecking && styles.mainBtnLoading 
               ]} 
               onPress={handleVerify} 
-              activeOpacity={0.8}
               disabled={isButtonDisabled}
+              activeOpacity={0.8}
             >
               {isChecking ? (
-                <View style={styles.btnContent}>
-                  <ActivityIndicator color="#000" style={{ marginRight: 10 }} size="small" />
-                  <Text style={styles.mainBtnText}>Verifying...</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <ActivityIndicator color="#000" size="small" style={{ marginRight: 8 }} />
+                  <Text style={styles.mainBtnText}>Checking...</Text>
                 </View>
               ) : (
-                <Text style={[styles.mainBtnText, isButtonDisabled && { color: '#444' }]}>
-                   Verify & Finish
-                </Text>
+                <Text style={[styles.mainBtnText, isButtonDisabled && { color: '#666' }]}>Connect Account</Text>
               )}
             </TouchableOpacity>
 
             {!isChecking && (
-              <TouchableOpacity onPress={() => setIsSkipped(true)} style={styles.skipBtn}>
-                <Text style={styles.skipText}>Set up later in settings</Text>
+              <TouchableOpacity onPress={skipSetup} style={styles.skipBtn} activeOpacity={0.6}>
+                <Text style={styles.skipText}>I'll do this later</Text>
               </TouchableOpacity>
             )}
 
+            {/* Error Modal */}
             <Modal visible={errorModal} transparent animationType="fade">
               <View style={styles.modalBackdrop}>
                 <View style={styles.modalCard}>
-                  <Icon name="alert-circle-outline" size={48} color="#FF3B30" />
-                  <Text style={styles.modalTitle}>Verification Failed</Text>
-                  <Text style={styles.modalDesc}>
-                    We couldn't find this username on LeetCode. Please check the spelling and try again.
-                  </Text>
+                  <Icon name="close-circle" size={48} color="#FF3B30" />
+                  <Text style={styles.modalTitle}>User Not Found</Text>
+                  <Text style={styles.modalDesc}>We couldn't locate that username. Please double-check the spelling.</Text>
                   <TouchableOpacity style={styles.retryBtn} onPress={() => setErrorModal(false)}>
                     <Text style={styles.retryText}>Try Again</Text>
                   </TouchableOpacity>
                 </View>
               </View>
             </Modal>
+
           </KeyboardAvoidingView>
         </SafeAreaView>
       </TouchableWithoutFeedback>
     );
   }
 
+  // --- 3. FINAL FLOW ---
   return (
     <View style={{ flex: 1, backgroundColor: '#000' }}>
       {isCurrentlyLocked ? <LockScreen /> : <DrawerNavigator />}
@@ -208,83 +191,43 @@ export const MainNavigator = () => {
 };
 
 // --- HELPER COMPONENT ---
-const PermissionRow = ({ title, desc, active, icon, onPress }) => (
-  <TouchableOpacity 
-    style={styles.permRow} 
-    onPress={onPress}
-    activeOpacity={active ? 1 : 0.7}
-  >
-    <Icon name={icon} size={24} color={active ? "#30D158" : "#8E8E8E"} style={styles.permIcon} />
+const PermissionRow = ({ title, active, onPress }) => (
+  <TouchableOpacity style={styles.permRow} onPress={onPress} activeOpacity={0.7}>
     <View style={{ flex: 1 }}>
-      <Text style={[styles.permTitle, { color: active ? "#FFF" : "#8E8E8E" }]}>{title}</Text>
-      <Text style={styles.permDesc}>{desc}</Text>
+      <Text style={[styles.permTitle, { color: active ? "#FFF" : "#888" }]}>{title}</Text>
     </View>
-    {active ? (
-      <Icon name="checkmark-circle" size={26} color="#30D158" />
-    ) : (
-      <View style={styles.setupBadge}>
-        <Text style={styles.setupBadgeText}>Set up</Text>
-      </View>
-    )}
+    {active ? <Icon name="checkmark-circle" size={24} color="#30D158" /> : <Icon name="chevron-forward" size={20} color="#444" />}
   </TouchableOpacity>
 );
 
 const styles = StyleSheet.create({
-  loadingContainer: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
-  container: { flex: 1, backgroundColor: '#000', paddingHorizontal: 28 },
-  headerSection: { alignItems: 'center', marginTop: 80, marginBottom: 40 },
-  iconCircle: {
-    width: 64, height: 64, borderRadius: 32,
-    backgroundColor: 'rgba(10, 132, 255, 0.1)',
-    justifyContent: 'center', alignItems: 'center', marginBottom: 20
-  },
-  title: { color: '#FFF', fontSize: 24, fontWeight: '700' },
-  subtitle: { color: '#888', fontSize: 14, textAlign: 'center', marginTop: 10, lineHeight: 20 },
+  container: { flex: 1, backgroundColor: '#000', paddingHorizontal: 30 },
+  headerSection: { alignItems: 'center', marginTop: 80, marginBottom: 50 },
+  iconCircle: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#111', justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
+  title: { color: '#FFF', fontSize: 24, fontWeight: '700', letterSpacing: -0.5 },
+  subtitle: { color: '#888', fontSize: 15, textAlign: 'center', marginTop: 8, lineHeight: 22 },
   
-  cardContainer: {
-    backgroundColor: '#111', borderRadius: 24, borderWidth: 1, borderColor: '#222', overflow: 'hidden'
-  },
+  cardContainer: { backgroundColor: '#111', borderRadius: 20, overflow: 'hidden' },
   permRow: { flexDirection: 'row', alignItems: 'center', padding: 20 },
-  permIcon: { marginRight: 15 },
-  permTitle: { fontSize: 16, fontWeight: '600' },
-  permDesc: { color: '#555', fontSize: 13, marginTop: 2 },
+  permTitle: { fontSize: 16, fontWeight: '500' },
   separator: { height: 1, backgroundColor: '#222', marginHorizontal: 20 },
 
-  setupBadge: { backgroundColor: '#0A84FF', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8 },
-  setupBadgeText: { color: '#FFF', fontWeight: '700', fontSize: 12 },
-
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%', backgroundColor: '#111', borderRadius: 18,
-    paddingHorizontal: 18, borderWidth: 1, borderColor: '#222', marginBottom: 20
-  },
-  inputFocused: { borderColor: '#FF9F0A' },
-  input: { color: '#FFF', fontSize: 16, height: 60, flex: 1 },
+  inputWrapper: { flexDirection: 'row', alignItems: 'center', width: '100%', backgroundColor: '#111', borderRadius: 16, paddingHorizontal: 18, marginBottom: 20, borderWidth: 1, borderColor: '#111' },
+  inputFocused: { borderColor: '#555', backgroundColor: '#1A1A1A' },
+  input: { color: '#FFF', fontSize: 16, height: 56, flex: 1 },
   
-  mainBtn: {
-    backgroundColor: '#FFF', width: '100%', height: 60,
-    borderRadius: 18, justifyContent: 'center', alignItems: 'center'
-  },
-  mainBtnDisabled: {
-    backgroundColor: 'transparent', borderColor: '#222', borderWidth: 1
-  },
-  btnContent: { flexDirection: 'row', alignItems: 'center' },
-  mainBtnText: { color: '#000', fontWeight: '800', fontSize: 16 },
+  mainBtn: { backgroundColor: '#FFF', width: '100%', height: 56, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
+  mainBtnDisabled: { backgroundColor: '#111' },
+  mainBtnLoading: { backgroundColor: '#FFF', opacity: 0.8 }, 
+  mainBtnText: { color: '#000', fontWeight: '700', fontSize: 16 },
   
-  skipBtn: { marginTop: 25, alignSelf: 'center' },
-  skipText: { color: '#555', fontSize: 14, fontWeight: '600' },
+  skipBtn: { marginTop: 20, alignSelf: 'center', padding: 10 },
+  skipText: { color: '#666', fontSize: 14, fontWeight: '500' },
 
-  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center' },
-  modalCard: {
-    width: '80%', backgroundColor: '#111', borderRadius: 28,
-    padding: 30, alignItems: 'center', borderWidth: 1, borderColor: '#333'
-  },
-  modalTitle: { color: '#FFF', fontSize: 18, fontWeight: 'bold', marginTop: 15 },
-  modalDesc: { color: '#888', textAlign: 'center', marginTop: 10, lineHeight: 20, fontSize: 14 },
-  retryBtn: {
-    backgroundColor: '#FFF', width: '100%', paddingVertical: 14,
-    borderRadius: 12, marginTop: 25, alignItems: 'center'
-  },
-  retryText: { color: '#000', fontWeight: 'bold', fontSize: 15 }
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center' },
+  modalCard: { width: '80%', backgroundColor: '#111', borderRadius: 24, padding: 30, alignItems: 'center' },
+  modalTitle: { color: '#FFF', fontSize: 18, fontWeight: '700', marginTop: 15 },
+  modalDesc: { color: '#888', textAlign: 'center', marginTop: 10, lineHeight: 20 },
+  retryBtn: { backgroundColor: '#FFF', width: '100%', paddingVertical: 14, borderRadius: 12, marginTop: 25, alignItems: 'center' },
+  retryText: { color: '#000', fontWeight: '700' }
 });
