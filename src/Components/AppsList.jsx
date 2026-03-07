@@ -11,6 +11,7 @@ import useSettingsStore from '../store/useSettingStore';
 import AlphabetNavigator from './AppList/AlphabetNavigator';
 
 const { InstalledApps } = NativeModules;
+const ITEM_HEIGHT = 56; 
 
 const AppsList = () => {
   const installedAppsEmitter = new NativeEventEmitter(InstalledApps);
@@ -42,6 +43,7 @@ const AppsList = () => {
     fetchApps(shuffleApps, "SHUFFLE APPS");
   }, [shuffleApps]);
 
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={AppListstyle.container}>
@@ -54,7 +56,9 @@ const AppsList = () => {
               data={apps} 
               showsVerticalScrollIndicator={false}
               keyExtractor={(item) => item.packageName}
-              
+              getItemLayout={(data, index) => (
+                { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
+              )}
               renderItem={({ item }) => (  
                 <TouchableOpacity 
                   style={AppListstyle.appItem} 
