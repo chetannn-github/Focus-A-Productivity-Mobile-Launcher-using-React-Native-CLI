@@ -28,12 +28,15 @@ function SettingScreen() {
     switchStyle,
     switchStyle2,
     switchTranslateX,
-    switchTranslateX2
+    switchTranslateX2,
+    switchStyle3,
+    switchTranslateX3
   } = useSetting();
 
   const { 
     showAppIcons, toggleAppIcons, selectedWallpaper, shuffleApps, toggleShuffleApps,
-    changeWallpaper, isLCLocked, lockWithLeetCode, checkLCUnlockStatus, lcUsername, isChecking, questionsToSolve
+    changeWallpaper, isLCLocked, lockWithLeetCode, checkLCUnlockStatus, lcUsername, isChecking, questionsToSolve,
+    showLCStats, toggleLCStats
   } = useSettingsStore();
   
   const { hiddenApps, unhideApp, masterApps } = useApps(); 
@@ -100,13 +103,13 @@ function SettingScreen() {
           {/* ========================================== */}
           <Text style={customStyles.sectionLabel}>CUSTOMIZATION</Text>
 
-          {/* --- App List Section --- */}
+          {/* --- Home & Drawer Section --- */}
           <View style={styles.collapsibleContainer}>
             <TouchableWithoutFeedback onPress={() => toggleSection('appList')}>
               <View style={styles.collapsibleHeaderContainer}>
                 <View style={styles.sectionTitleRow}>
                   <Icon name="grid-view" size={22} color="#0A84FF" />
-                  <Text style={styles.collapsibleHeader}>App Drawer</Text>
+                  <Text style={styles.collapsibleHeader}>Home & Drawer</Text>
                 </View>
                 <Icon name={activeSection === 'appList' ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={24} color="#8E8E93" />
               </View>
@@ -136,6 +139,20 @@ function SettingScreen() {
                   }}
                 >
                   <Animated.View style={[styles.switchCircle, switchStyle2]} />
+                </Pressable>
+              </View>
+
+              {/* NAYA LEETCODE STATS TOGGLE */}
+              <View style={[styles.switchContainer, { paddingVertical: 8 }]}>
+                <Text style={styles.switchLabel}>Show LC Stats on Home</Text>
+                <Pressable
+                  style={[styles.switchBase,{ backgroundColor: showLCStats ? "#BF5AF2" : "#3A3A3C" }]}
+                  onPress={() => {
+                    toggleLCStats();
+                    switchTranslateX3.value = showLCStats ? 0 : 20;
+                  }}
+                >
+                  <Animated.View style={[styles.switchCircle, switchStyle3]} />
                 </Pressable>
               </View>
             </Animated.View>

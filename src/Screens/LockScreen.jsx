@@ -12,7 +12,8 @@ const LockScreen = () => {
     checkLCUnlockStatus, 
     isChecking,
     questionsToSolve,
-    lockedUntil
+    lockedUntil,
+    lcStats
   } = useSettingsStore();
   
   const [quote, setQuote] = useState("");
@@ -75,6 +76,27 @@ const LockScreen = () => {
             <Text style={{ color: '#666666', fontSize: 15, marginTop: 10, letterSpacing: 1.5 }}>
               GOAL: {questionsToSolve} PROBLEMS
             </Text>
+
+            <View style={customStyles.statsContainer}>
+              <View style={customStyles.statItem}>
+                <Text style={[customStyles.statLabel, { color: '#00b8a3' }]}>Easy</Text>
+                <Text style={customStyles.statValue}>{lcStats?.easy || 0}</Text>
+              </View>
+              
+              <View style={customStyles.statDivider} />
+              
+              <View style={customStyles.statItem}>
+                <Text style={[customStyles.statLabel, { color: '#ffc01e' }]}>Medium</Text>
+                <Text style={customStyles.statValue}>{lcStats?.medium || 0}</Text>
+              </View>
+              
+              <View style={customStyles.statDivider} />
+              
+              <View style={customStyles.statItem}>
+                <Text style={[customStyles.statLabel, { color: '#ff375f' }]}>Hard</Text>
+                <Text style={customStyles.statValue}>{lcStats?.hard || 0}</Text>
+              </View>
+            </View>
           </View>
         )}
 
@@ -184,6 +206,54 @@ const customStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#AAAAAA',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0A0A0A',
+    borderRadius: 16,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#1A1A1A',
+    width: '85%',
+    justifyContent: 'space-between',
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 5,
+    letterSpacing: 1,
+  },
+  statValue: {
+    color: '#E5E5EA',
+    fontSize: 20,
+    fontWeight: '300',
+  },
+  statDivider: {
+    width: 1,
+    height: '70%',
+    backgroundColor: '#1A1A1A',
+  },
+  actionButton: {
+    backgroundColor: 'transparent', 
+    paddingVertical: 14,
+    paddingHorizontal: 35,
+    borderRadius: 30, 
+    marginTop: 60,
+    borderWidth: 1,
+    borderColor: '#333333', 
+    alignItems: 'center',
+  },
+  actionButtonText: {
+    color: '#888888',
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 2,
   },
 });
 

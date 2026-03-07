@@ -1,56 +1,45 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 export async function getLeetCodeSolved(username) {
-  const res = await fetch("https://leetcode.com/graphql", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Referer": "https://leetcode.com",
-      "Origin": "https://leetcode.com",
-      "User-Agent": "Mozilla/5.0"
-    },
-    body: JSON.stringify({
-      query: `
-        query getUserProfile($username: String!) {
-          matchedUser(username: $username) {
-            submitStats {
-              acSubmissionNum {
-                difficulty
-                count
+  try {
+    const res = await fetch("https://leetcode.com/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Referer": "https://leetcode.com",
+        "Origin": "https://leetcode.com",
+        "User-Agent": "Mozilla/5.0"
+      },
+      body: JSON.stringify({
+        query: `
+          query getUserProfile($username: String!) {
+            matchedUser(username: $username) {
+              submitStats {
+                acSubmissionNum {
+                  difficulty
+                  count
+                }
               }
             }
           }
-        }
-      `,
-      variables: { username }
-    })
-  });
+        `,
+        variables: { username }
+      })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
+    const submissions = data?.data?.matchedUser?.submitStats?.acSubmissionNum;
 
-  const totalSolved =
-    data?.data?.matchedUser?.submitStats?.acSubmissionNum?.find(
-      (d) => d.difficulty === "All"
-    )?.count || null;
+    if (!submissions) return null;
 
-  return totalSolved;
-}
+    const stats = {
+      total: submissions.find((d) => d.difficulty === "All")?.count || 0,
+      easy: submissions.find((d) => d.difficulty === "Easy")?.count || 0,
+      medium: submissions.find((d) => d.difficulty === "Medium")?.count || 0,
+      hard: submissions.find((d) => d.difficulty === "Hard")?.count || 0,
+    };
 
-
-const saveLCQuestions = async() => {
-  const completedCount = await getLeetCodeSolved("chetan-nan");
-  await AsyncStorage.setItem("LC", completedCount + "");
-}
-
-export const performLCLock = async() => {
-  await saveLCQuestions();
-}
-
-
-export const checkLCUnlocked = async() => {
-  const completedCount =  await getLeetCodeSolved("chetan-nan");
-
-  const previousCompletedCount = await AsyncStorage.getItem("LC");
-
-  return completedCount > Number(previousCompletedCount)
+    return stats;
+  } catch (error) {
+    console.error("LeetCode API Error:", error);
+    return null;
+  }
 }

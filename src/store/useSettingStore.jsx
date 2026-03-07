@@ -14,6 +14,8 @@ const useSettingsStore = create((set, get) => ({
   lcUsername: "",
   isChecking: false,
   questionsToSolve: 1, 
+  lcStats: { total: 0, easy: 0, medium: 0, hard: 0 },
+  showLCStats: true,
 
   loadSettings: async () => {
     try {
@@ -25,7 +27,8 @@ const useSettingsStore = create((set, get) => ({
       const storedIsLCLocked = await AsyncStorage.getItem("isLCLocked");
       const storedLastLCCount = await AsyncStorage.getItem("LC");
       const storedQuestionsToSolve = await AsyncStorage.getItem("questionsToSolve"); // Load new state
-
+      const storedLcStats = await AsyncStorage.getItem("lcStats");
+      const storedShowLCStats = await AsyncStorage.getItem('showLCStats');
       const lockedUntil = storedLockedUntil ? Number(storedLockedUntil) : 0;
 
       set({
@@ -37,6 +40,8 @@ const useSettingsStore = create((set, get) => ({
         isLCLocked: storedIsLCLocked === "true",
         lastLCCount: storedLastLCCount ? Number(storedLastLCCount) : 0,
         questionsToSolve: storedQuestionsToSolve ? Number(storedQuestionsToSolve) : 1, // Default to 1
+        lcStats: storedLcStats ? JSON.parse(storedLcStats) : { total: 0, easy: 0, medium: 0, hard: 0 },
+        showLCStats: storedShowLCStats !== null ? storedShowLCStats === 'true' : true,
       });
     } catch (e) {
       console.error("Error loading settings", e);
@@ -81,20 +86,22 @@ const useSettingsStore = create((set, get) => ({
   lockWithLeetCode: async (username, numQuestions = 1) => {
     set({ isChecking: true }); 
     try {
-      const targetUsername = username || get().lcUsername;
-      const completedCount = await getLeetCodeSolved(targetUsername);      
+     const targetUsername = username || get().lcUsername;
+      const stats = await getLeetCodeSolved(targetUsername); // Now returns an object      
       
-      if (completedCount === undefined || completedCount === null) {
+      if (!stats || stats.total === undefined) {
          throw new Error("Invalid username or API Error");
       }
       
-      await AsyncStorage.setItem("LC", completedCount.toString());
+      await AsyncStorage.setItem("LC", stats.total.toString());
+      await AsyncStorage.setItem("lcStats", JSON.stringify(stats)); // Store full stats
       await AsyncStorage.setItem("isLCLocked", "true");
       await AsyncStorage.setItem("lcUsername", targetUsername);
-      await AsyncStorage.setItem("questionsToSolve", numQuestions.toString()); // Persist questions
+      await AsyncStorage.setItem("questionsToSolve", numQuestions.toString()); 
 
       set({ 
-        lastLCCount: completedCount, 
+        lastLCCount: stats.total, 
+        lcStats: stats, // Set in state
         isLCLocked: true,
         lcUsername: targetUsername,
         questionsToSolve: numQuestions,
@@ -114,23 +121,25 @@ const useSettingsStore = create((set, get) => ({
       const { lastLCCount, isLCLocked, lcUsername, questionsToSolve } = get();
       if (!isLCLocked) {
         set({ isChecking: false });
-        return true; 
+        return { unlocked: true, solved: 0, needed: questionsToSolve }; 
       }
 
-      const targetUsername = lcUsername;
-      const currentCount = await getLeetCodeSolved(targetUsername);
+      const currentStats = await getLeetCodeSolved(lcUsername);
+      if (!currentStats) throw new Error("API failed");
 
-      if (currentCount >= lastLCCount + questionsToSolve) {
+      const solvedCount = currentStats.total - lastLCCount;
+
+      if (currentStats.total >= lastLCCount + questionsToSolve) {
         await AsyncStorage.setItem("isLCLocked", "false");
-        set({ isLCLocked: false, isChecking: false });
-        return { unlocked: true, solved: currentCount - lastLCCount, needed: questionsToSolve }; // Returning more details
+        set({ isLCLocked: false, isChecking: false, lcStats: currentStats }); // Update stats on unlock
+        return { unlocked: true, solved: solvedCount, needed: questionsToSolve }; 
       }
-
-
-      console.log(currentCount, lastLCCount+ questionsToSolve)
       
-      set({ isChecking: false });
-      return { unlocked: false, solved: currentCount - lastLCCount, needed: questionsToSolve }; // Returning details for better alerts
+      // Update stats silently even if still locked (so user sees live progress)
+      await AsyncStorage.setItem("lcStats", JSON.stringify(currentStats));
+      set({ lcStats: currentStats, isChecking: false });
+      
+      return { unlocked: false, solved: solvedCount, needed: questionsToSolve };
     } catch (e) {
       console.error("Error checking LC status", e);
       set({ isChecking: false });
@@ -142,7 +151,12 @@ const useSettingsStore = create((set, get) => ({
     if (wallpaperUri === get().selectedWallpaper) return;
     set({ selectedWallpaper: wallpaperUri });
     await AsyncStorage.setItem('selectedWallpaper', wallpaperUri);
-  }
+  },
+  toggleLCStats: async () => {
+    const newValue = !get().showLCStats;
+    set({ showLCStats: newValue });
+    await AsyncStorage.setItem('showLCStats', newValue.toString());
+  },
 }));
 
 export default useSettingsStore;

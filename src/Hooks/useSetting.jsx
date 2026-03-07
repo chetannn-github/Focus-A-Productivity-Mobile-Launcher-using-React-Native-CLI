@@ -4,10 +4,8 @@ import { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reani
 import useSettingsStore from "../store/useSettingStore";
 
 function useSetting() {
-    const { lockForMinutes, showAppIcons, shuffleApps } = useSettingsStore();
+    const { lockForMinutes, showAppIcons, shuffleApps, showLCStats } = useSettingsStore();
     const drawerStatus = useDrawerStatus();
-
-    // SINGLE STATE FOR ACCORDION (Kaunsa dabba khula hai)
     const [activeSection, setActiveSection] = useState(null); 
     const [newLockedTime, setNewLockedTime] = useState("10");
 
@@ -85,6 +83,11 @@ function useSetting() {
     const switchStyle2 = useAnimatedStyle(() => ({
         transform: [{ translateX: withTiming(switchTranslateX2.value, { duration: 200 }) }],
     }));
+    const switchTranslateX3 = useSharedValue(showLCStats ? 20 : 0);
+
+const switchStyle3 = useAnimatedStyle(() => ({
+    transform: [{ translateX: withTiming(switchTranslateX3.value, { duration: 200 }) }],
+}));
 
     return {
         activeSection,
@@ -100,7 +103,9 @@ function useSetting() {
         switchStyle,
         switchStyle2,
         switchTranslateX,
-        switchTranslateX2
+        switchTranslateX2,
+        switchStyle3,
+        switchTranslateX3
     }       
 }
 
