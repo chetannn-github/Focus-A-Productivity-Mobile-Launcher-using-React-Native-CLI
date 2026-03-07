@@ -1,18 +1,23 @@
 import React from "react";
 import { 
   View, Text, TouchableOpacity, ActivityIndicator, Animated,
-  StyleSheet,
+  StyleSheet, Platform
 } from "react-native";
-
 import Icon from "react-native-vector-icons/Ionicons";
-
+import useSettingsStore from "../../store/useSettingStore"; 
+import { langConfig } from "../../Constants/languageConfig";
 
 export const LeetCodeLockView = ({ 
   questionsToSolve, lcStats, quote, 
   isChecking, onCheck, blinkAnim 
 }) => {
+  
+  const favLanguage = useSettingsStore((state) => state.favLanguage) || "typescript";
+  const L =  langConfig[favLanguage];
+
   return (
     <View style={leetCodeStyles.centerBlock}>
+      
       {/* IDE Window */}
       <View style={leetCodeStyles.ideWindow}>
         <View style={leetCodeStyles.ideHeader}>
@@ -21,7 +26,7 @@ export const LeetCodeLockView = ({
             <View style={[leetCodeStyles.macDot, { backgroundColor: '#FFBD2E' }]} />
             <View style={[leetCodeStyles.macDot, { backgroundColor: '#27C93F' }]} />
           </View>
-          <Text style={leetCodeStyles.fileName}>lock_protocol.ts</Text>
+          <Text style={leetCodeStyles.fileName}>{L.fileName}</Text>
           <Icon name="code-working-outline" size={16} color="#5C6370" />
         </View>
 
@@ -29,88 +34,68 @@ export const LeetCodeLockView = ({
           <View style={leetCodeStyles.codeRow}>
             <Text style={leetCodeStyles.lineNumber}>1</Text>
             <Text style={leetCodeStyles.codeText}>
-              <Text style={leetCodeStyles.keyword}>const </Text>
-              <Text style={leetCodeStyles.variable}>status </Text>
-              <Text style={leetCodeStyles.operator}>= </Text>
-              <Text style={leetCodeStyles.string}>"LOCKED"</Text>
-              <Text style={leetCodeStyles.operator}>;</Text>
+              <Text style={leetCodeStyles.keyword}>{L.kw}</Text>
+              <Text style={leetCodeStyles.variable}>{L.var}</Text>
+              <Text style={leetCodeStyles.operator}>{L.op}</Text>
+              <Text style={leetCodeStyles.string}>{L.str}</Text>
+              <Text style={leetCodeStyles.operator}>{L.terminator}</Text>
             </Text>
           </View>
 
-          <View style={leetCodeStyles.codeRow}>
-            <Text style={leetCodeStyles.lineNumber}>2</Text>
-          </View>
+          <View style={leetCodeStyles.codeRow}><Text style={leetCodeStyles.lineNumber}>2</Text></View>
 
           <View style={leetCodeStyles.codeRow}>
             <Text style={leetCodeStyles.lineNumber}>3</Text>
             <Text style={leetCodeStyles.codeText}>
-              <Text style={leetCodeStyles.keyword}>await </Text>
-              <Text style={leetCodeStyles.function}>requireSolutions</Text>
-              <Text style={leetCodeStyles.operator}>({questionsToSolve});</Text>
+              <Text style={leetCodeStyles.keyword}>{favLanguage === 'typescript' ? 'await ' : ''}</Text>
+              <Text style={leetCodeStyles.function}>{L.func}</Text>
+              <Text style={leetCodeStyles.operator}>({questionsToSolve}){L.terminator}</Text>
             </Text>
           </View>
 
-          <View style={leetCodeStyles.codeRow}>
-            <Text style={leetCodeStyles.lineNumber}>4</Text>
-          </View>
+          <View style={leetCodeStyles.codeRow}><Text style={leetCodeStyles.lineNumber}>4</Text></View>
 
           <View style={leetCodeStyles.codeRow}>
             <Text style={leetCodeStyles.lineNumber}>5</Text>
             <Text style={leetCodeStyles.codeText}>
-              <Text style={leetCodeStyles.keyword}>const </Text>
-              <Text style={leetCodeStyles.variable}>current_stats </Text>
+              <Text style={leetCodeStyles.variable}>stats </Text>
               <Text style={leetCodeStyles.operator}>= </Text>
-              <Text style={leetCodeStyles.operator}>{'{'}</Text>
+              <Text style={leetCodeStyles.operator}>{L.startBrace}</Text>
             </Text>
           </View>
 
-          <View style={leetCodeStyles.codeRow}>
-            <Text style={leetCodeStyles.lineNumber}>6</Text>
-            <Text style={leetCodeStyles.codeText}>
-              <Text style={leetCodeStyles.property}>  easy</Text>
-              <Text style={leetCodeStyles.operator}>: </Text>
-              <Text style={leetCodeStyles.number}>{lcStats?.easy || 0}</Text>
-              <Text style={leetCodeStyles.operator}>,</Text>
-            </Text>
-          </View>
-
-          <View style={leetCodeStyles.codeRow}>
-            <Text style={leetCodeStyles.lineNumber}>7</Text>
-            <Text style={leetCodeStyles.codeText}>
-              <Text style={leetCodeStyles.property}>  medium</Text>
-              <Text style={leetCodeStyles.operator}>: </Text>
-              <Text style={leetCodeStyles.number}>{lcStats?.medium || 0}</Text>
-              <Text style={leetCodeStyles.operator}>,</Text>
-            </Text>
-          </View>
-
-          <View style={leetCodeStyles.codeRow}>
-            <Text style={leetCodeStyles.lineNumber}>8</Text>
-            <Text style={leetCodeStyles.codeText}>
-              <Text style={leetCodeStyles.property}>  hard</Text>
-              <Text style={leetCodeStyles.operator}>: </Text>
-              <Text style={leetCodeStyles.number}>{lcStats?.hard || 0}</Text>
-            </Text>
-          </View>
+          {['easy', 'medium', 'hard'].map((level, idx) => (
+            <View key={level} style={leetCodeStyles.codeRow}>
+              <Text style={leetCodeStyles.lineNumber}>{6 + idx}</Text>
+              <Text style={leetCodeStyles.codeText}>
+                <Text style={leetCodeStyles.property}>{L.indent}"{level}"</Text>
+                <Text style={leetCodeStyles.operator}>: </Text>
+                <Text style={leetCodeStyles.number}>{lcStats?.[level] || 0}</Text>
+                {idx < 2 && <Text style={leetCodeStyles.operator}>,</Text>}
+              </Text>
+            </View>
+          ))}
 
           <View style={leetCodeStyles.codeRow}>
             <Text style={leetCodeStyles.lineNumber}>9</Text>
             <Text style={leetCodeStyles.codeText}>
-              <Text style={leetCodeStyles.operator}>{'}'};</Text>
+              <Text style={leetCodeStyles.operator}>{L.endBrace}</Text>
               <Animated.Text style={{ opacity: blinkAnim, color: '#61AFEF' }}>_</Animated.Text>
             </Text>
           </View>
         </View>
       </View>
 
+      {/* Quote Section */}
       <View style={leetCodeStyles.quoteWrapper}>
         <Text style={leetCodeStyles.quoteText}>
-          <Text style={{ color: '#5C6370' }}>// output:{"\n"}</Text>
+          <Text style={{ color: '#5C6370' }}>{L.comment}output:{"\n"}</Text>
           <Text style={{ color: '#ABB2BF' }}>&gt; </Text>
           "{quote}"
         </Text>
       </View>
 
+      {/* 🔥 DYNAMIC CLI BUTTON 🔥 */}
       <TouchableOpacity 
         style={[leetCodeStyles.cliButton, isChecking && { opacity: 0.5 }]} 
         onPress={onCheck}
@@ -118,12 +103,12 @@ export const LeetCodeLockView = ({
         activeOpacity={0.8}
       >
         {isChecking ? (
-          <ActivityIndicator color="#61AFEF" size="small" />
+          <ActivityIndicator color={L.cliColor} size="small" />
         ) : (
           <Text style={leetCodeStyles.cliButtonText}>
-            <Text style={{ color: '#E06C75' }}>~</Text>
-            <Text style={{ color: '#98C379' }}> npm run </Text>
-            <Text style={{ color: '#61AFEF' }}>unlock</Text>
+            <Text style={{ color: L.cliColor }}>{L.cliPrompt}</Text>
+            <Text style={{ color: '#98C379' }}>{L.cliCmd}</Text>
+            <Text style={{ color: '#61AFEF' }}>{L.cliArgs}</Text>
           </Text>
         )}
       </TouchableOpacity>
