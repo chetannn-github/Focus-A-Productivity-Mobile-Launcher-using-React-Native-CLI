@@ -63,8 +63,10 @@ const useApps = create((set, get) => ({
     }
   },
 
-  fetchApps: async (shuffleAppsStatus = false) => {
-    set({ loading: true });
+  fetchApps: async (shuffleAppsStatus = false, reason) => {
+
+    console.log("FETCHING APPS", reason)
+    if(reason !== "EVENT") set({ loading: true });
     try {
       const allApps = await InstalledApps.getInstalledApps();
       set({ masterApps: allApps }); 

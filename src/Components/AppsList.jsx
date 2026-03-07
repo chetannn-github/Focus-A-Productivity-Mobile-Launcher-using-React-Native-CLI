@@ -30,7 +30,7 @@ const AppsList = () => {
 
   useEffect(() => {
     const subscription = installedAppsEmitter.addListener('appListUpdated', () => {
-      fetchApps(shuffleApps);
+      fetchApps(shuffleApps, "EVENT");
     });
     return () => subscription.remove();
   }, [shuffleApps]);

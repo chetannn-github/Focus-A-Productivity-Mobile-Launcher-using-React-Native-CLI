@@ -45,6 +45,15 @@ class InstalledAppsModule(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
+    fun addListener(eventName: String) {
+       
+    }
+
+    @ReactMethod
+    fun removeListeners(count: Int) {
+    }
+
+    @ReactMethod
     fun getInstalledApps(promise: Promise) {
         try {
             val pm: PackageManager = reactApplicationContext.packageManager
