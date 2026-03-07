@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLeetCodeSolved } from '../utils/leetcode';
+import { NativeModules } from 'react-native';
+
+const { InstalledApps } = NativeModules;
 
 const useSettingsStore = create((set, get) => ({
   showAppIcons: true,
@@ -17,6 +20,8 @@ const useSettingsStore = create((set, get) => ({
   lcStats: { total: 0, easy: 0, medium: 0, hard: 0 },
   showLCStats: true,
 
+
+  defaultPhoneApp: null,
   perms: { overlay: null, admin: null },
   setPerms: (newPerms) => set({ perms: newPerms }),
   favLanguage: 'python', 
@@ -46,6 +51,18 @@ const useSettingsStore = create((set, get) => ({
       const lockedUntil = storedLockedUntil ? Number(storedLockedUntil) : 0;
       const storedFavLanguage = await AsyncStorage.getItem('favLanguage');
 
+      let storedPhoneApp = await AsyncStorage.getItem("defaultPhoneApp");
+      if (!storedPhoneApp && InstalledApps) {
+        try {
+          storedPhoneApp = await InstalledApps.getDefaultPhoneApp();
+          if (storedPhoneApp) {
+            await AsyncStorage.setItem("defaultPhoneApp", storedPhoneApp);
+          }
+        } catch (err) {
+          console.error("Phone app fetch error:", err);
+        }
+      }
+
       const now = Date.now();
       const initialRemaining = Math.max(0, Math.floor((lockedUntil - now) / 1000));
 
@@ -54,6 +71,7 @@ const useSettingsStore = create((set, get) => ({
         shuffleApps: storedShuffleApps !== null ? storedShuffleApps === 'true' : false,
         selectedWallpaper: storedWallpaper ? storedWallpaper : null,
         lockedUntil,
+        defaultPhoneApp: storedPhoneApp,
         remainingTime: initialRemaining,
         lcUsername: storedLcUsername || "",
         isLCLocked: storedIsLCLocked === "true",
