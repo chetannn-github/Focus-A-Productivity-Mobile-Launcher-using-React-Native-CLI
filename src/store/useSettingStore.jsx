@@ -157,6 +157,33 @@ const useSettingsStore = create((set, get) => ({
     set({ showLCStats: newValue });
     await AsyncStorage.setItem('showLCStats', newValue.toString());
   },
+
+  verifyAndSetLCUsername: async (username) => {
+    set({ isChecking: true }); 
+    try {
+      const targetUsername = username;
+      const stats = await getLeetCodeSolved(targetUsername);   
+      
+      if (!stats || stats.total === undefined) {
+        throw new Error("Invalid username or API Error");
+      }
+      
+      await AsyncStorage.setItem("LC", stats.total.toString());
+      await AsyncStorage.setItem("lcStats", JSON.stringify(stats)); // Store full stats
+      await AsyncStorage.setItem("lcUsername", targetUsername);
+      
+      set({ 
+        lastLCCount: stats.total, 
+        lcStats: stats, // Set in state
+        lcUsername: targetUsername,
+        isChecking: false 
+      });
+      return true;
+    } catch (e) {
+      set({ isChecking: false });
+      return false; 
+    }
+  }
 }));
 
 export default useSettingsStore;
