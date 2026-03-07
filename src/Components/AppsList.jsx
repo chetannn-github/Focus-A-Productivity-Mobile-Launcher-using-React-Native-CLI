@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { 
   Text, ActivityIndicator, Image, NativeEventEmitter, NativeModules, 
-  FlatList, SafeAreaView, TouchableOpacity, View 
+  SafeAreaView, TouchableOpacity, View 
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { FlashList } from "@shopify/flash-list"; 
 import { AppListstyle } from '../Stylesheets/AppListStyle';
 import useApps from '../store/useAppsStore';
 import AppInfoModal from './AppInfoModal';
@@ -51,14 +52,12 @@ const AppsList = () => {
           <ActivityIndicator size="large" color="#0A84FF" />
         ) : apps.length > 0 ? (
           <View style={{ flex: 1 }}>
-            <FlatList
+            <FlashList
               ref={flatListRef}
               data={apps} 
-              showsVerticalScrollIndicator={false}
               keyExtractor={(item) => item.packageName}
-              getItemLayout={(data, index) => (
-                { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
-              )}
+              estimatedItemSize={ITEM_HEIGHT}
+              showsVerticalScrollIndicator={false}
               renderItem={({ item }) => (  
                 <TouchableOpacity 
                   style={AppListstyle.appItem} 
@@ -75,6 +74,9 @@ const AppsList = () => {
                   )}
                   <Text style={AppListstyle.appName}>{item.appName}</Text>
                 </TouchableOpacity>
+              )}
+              getItemLayout={(data, index) => (
+                { length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index }
               )}
               bounces={true}  
               overScrollMode="always"

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback, memo } from 'react';
-import { View, Text, StyleSheet, Animated, PanResponder } from 'react-native';
+import { View, Text, StyleSheet, Animated, PanResponder, Vibration } from 'react-native';
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#".split('');
 
@@ -24,11 +24,7 @@ const LetterItem = memo(({ letter, animatedValue, isActive }) => {
       {isActive && (
         <Animated.View style={[styles.minimalDot, { opacity: activeOpacity }]} />
       )}
-      
-      <Text style={[
-        styles.alphabetText, 
-        isActive && styles.activeAlphabetText
-      ]}>
+      <Text style={[styles.alphabetText, isActive && styles.activeAlphabetText]}>
         {letter}
       </Text>
     </Animated.View>
@@ -186,7 +182,6 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     backgroundColor: '#0A84FF', 
-    opacity: 0.8,
   }
 });
 
