@@ -11,6 +11,9 @@ class OverlayPackage : ReactPackage {
     }
 
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-        return listOf(OverlayModule(reactContext))
-    }
+    return listOf(
+        OverlayModule(reactContext), 
+        ScreenLockModule(reactContext)
+    )
+}
 }

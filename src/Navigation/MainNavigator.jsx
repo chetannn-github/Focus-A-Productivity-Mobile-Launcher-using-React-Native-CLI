@@ -5,84 +5,108 @@ import LockScreen from "../Screens/LockScreen";
 import { DrawerNavigator } from "./DrawerNavigator";
 import useSettingsStore from "../store/useSettingStore";
 
-const { OverlayModule } = NativeModules;
+// Dono native modules nikal lo
+const { OverlayModule, ScreenLock } = NativeModules;
 
 export const MainNavigator = () => {
-  const [hasOverlayPermission, setHasOverlayPermission] = useState(null); 
-  const { remainingTime, isLCLocked, checkIsLocked} = useSettingsStore();
-  const isTimeLocked = remainingTime > 0 || checkIsLocked();
-  const isCurrentlyLocked = isLCLocked || isTimeLocked;
+  // State me dono permissions track karenge
+  const [perms, setPerms] = useState({ overlay: null, admin: null }); 
   
+  const { remainingTime, isLCLocked, lockedUntil } = useSettingsStore();
+  
+  const isTimeLocked = remainingTime > 0 || Date.now() < lockedUntil;
+  const isCurrentlyLocked = isLCLocked || isTimeLocked;
+
+  // 1. DONO PERMISSIONS CHECK KARNE KA LOGIC
   useEffect(() => {
-    const checkPerm = async () => {
-      if (OverlayModule) {
-        const granted = await OverlayModule.hasPermission();
-        setHasOverlayPermission(granted);
-      } else {
-        console.warn("OverlayModule is not available.");
-        setHasOverlayPermission(true);
+    const checkAllPerms = async () => {
+      if (OverlayModule && ScreenLock) {
+        const hasOverlay = await OverlayModule.hasPermission();
+        const hasAdmin = await ScreenLock.hasPermission();
+        setPerms({ overlay: hasOverlay, admin: hasAdmin });
       }
     };
 
-    checkPerm();
+    checkAllPerms();
 
+    // Jab user Settings me permission de kar wapas aaye toh auto-refresh
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (nextAppState === 'active') {
-        checkPerm();
+        checkAllPerms();
       }
     });
 
-    return () => {
-      subscription.remove();
-    };
+    return () => subscription.remove();
   }, []);
 
-  
+  // 2. OVERLAY BLOCKER (Escape Preventer)
   useEffect(() => {
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (isCurrentlyLocked && (nextAppState === 'background' || nextAppState === 'inactive')) {
-        console.log("Escape Attempt Detected! Force bringing to front...");
-        if (OverlayModule) {
+        console.log("Escape Attempt! Force bringing to front...");
+        if (OverlayModule && perms.overlay) {
           OverlayModule.bringToFront();
         }
       }
     });
+    return () => subscription.remove();
+  }, [isCurrentlyLocked, perms.overlay]);
 
-    return () => {
-      subscription.remove();
-    };
-  }, [isCurrentlyLocked]);
-
-  if (hasOverlayPermission === null) {
+  // Loading Screen (Shuru ke mili-seconds ke liye)
+  if (perms.overlay === null || perms.admin === null) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[styles.container, { justifyContent: 'center' }]}>
         <ActivityIndicator size="large" color="#0A84FF" />
       </View>
     );
   }
 
-  if (!hasOverlayPermission) {
+  // --- SETUP SCREEN (Agar koi ek bhi permission bachi hai) ---
+  if (!perms.overlay || !perms.admin) {
     return (
       <View style={styles.container}>
-        <View style={styles.permissionCard}>
-          <View style={styles.iconContainer}>
-            <Icon name="layers" size={40} color="#FF9F0A" />
-          </View>
-          <Text style={styles.title}>Permission Required</Text>
+        <View style={styles.setupCard}>
+          <Icon name="shield-checkmark" size={50} color="#FFF" style={{ marginBottom: 20 }} />
+          <Text style={styles.title}>Welcome to Focus</Text>
           <Text style={styles.subtitle}>
-            To prevent you from bypassing the lock screen and enforce strict focus, this launcher requires the "Display Over Other Apps" permission.
+            Please grant the required permissions to set up your ultimate distraction-free launcher.
           </Text>
-          <TouchableOpacity 
-            onPress={() => OverlayModule.requestPermission()} 
-            style={styles.primaryBtn}
-          >
-            <Text style={styles.btnText}>Open Settings to Grant</Text>
-          </TouchableOpacity>
+
+          {/* OVERLAY PERMISSION ROW */}
+          <View style={styles.permRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.permTitle}>Display Over Other Apps</Text>
+              <Text style={styles.permDesc}>Prevents bypassing the lock screen.</Text>
+            </View>
+            {perms.overlay ? (
+              <Icon name="checkmark-circle" size={28} color="#30D158" />
+            ) : (
+              <TouchableOpacity style={styles.grantBtn} onPress={() => OverlayModule.requestPermission()}>
+                <Text style={styles.grantText}>Grant</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <View style={styles.permRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.permTitle}>Accessibility Service</Text>
+              <Text style={styles.permDesc}>To lock screen without breaking fingerprint unlock.</Text>
+            </View>
+            {perms.admin ? ( // perms.admin variable name same rakh sakte ho
+              <Icon name="checkmark-circle" size={28} color="#30D158" />
+            ) : (
+              <TouchableOpacity style={styles.grantBtn} onPress={() => ScreenLock.requestPermission()}>
+                <Text style={styles.grantText}>Grant</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
         </View>
       </View>
     );
   }
 
+  // --- NORMAL FLOW (Jab dono permissions mil jayein) ---
   return (
     <View style={{ flex: 1, backgroundColor: '#000' }}>
       {isCurrentlyLocked ? <LockScreen /> : <DrawerNavigator />}
@@ -90,57 +114,64 @@ export const MainNavigator = () => {
   );
 };
 
+// --- STYLES ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingTop: 80, // Upar rakha hai taki thoda elegant lage
+    paddingHorizontal: 20,
   },
-  permissionCard: {
-    backgroundColor: '#121212',
+  setupCard: {
     width: '100%',
-    padding: 30,
-    borderRadius: 24,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#1C1C1E',
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#FF9F0A20',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
   },
   title: {
     color: '#FFF',
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '800',
-    marginBottom: 12,
-    letterSpacing: -0.5,
+    marginBottom: 10,
+    letterSpacing: 0.5,
   },
   subtitle: {
     color: '#8E8E93',
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
-    marginBottom: 30,
+    marginBottom: 40,
+    paddingHorizontal: 10,
   },
-  primaryBtn: {
-    backgroundColor: '#0A84FF',
-    width: '100%',
-    paddingVertical: 16,
-    borderRadius: 14,
+  permRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#121212',
+    padding: 18,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#1C1C1E',
+    marginBottom: 15,
+    width: '100%',
   },
-  btnText: {
+  permTitle: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: 'bold',
-    letterSpacing: 0.5,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  permDesc: {
+    color: '#666',
+    fontSize: 13,
+  },
+  grantBtn: {
+    backgroundColor: '#0A84FF',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  grantText: {
+    color: '#FFF',
+    fontWeight: '700',
+    fontSize: 13,
   }
 });

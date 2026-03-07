@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Pressable, StatusBar } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Pressable, StatusBar, NativeModules } from "react-native";
 import { motivationalQuotes } from "../Constants/quotes";
 import { styles } from "../Stylesheets/LockScreenStyle";
 import useSettingsStore from "../store/useSettingStore";
 import Icon from "react-native-vector-icons/Ionicons";
+import { handleBackgroundTap } from "../utils/doubleTap";
 
 const LockScreen = () => {
   const { 
@@ -15,6 +16,10 @@ const LockScreen = () => {
     lockedUntil,
     lcStats
   } = useSettingsStore();
+
+
+  
+  const { ScreenLock } = NativeModules;
   
   const [quote, setQuote] = useState("");
   const [alertConfig, setAlertConfig] = useState({ 
@@ -58,8 +63,9 @@ const LockScreen = () => {
   return (
     <View style={{ flex: 1, backgroundColor: "#000000" }}>
       <StatusBar hidden/>
+      
       <View style={[styles.container, { justifyContent: 'center', backgroundColor: '#000000' }]}>
-       
+        <Pressable style={StyleSheet.absoluteFill} onPress={() => handleBackgroundTap(ScreenLock)} />
         {!isLCLocked ? (
           <View style={{ alignItems: 'center' }}>
             <Text style={[styles.timer, { color: '#888888', fontSize: 48, fontWeight: '200' }]}>

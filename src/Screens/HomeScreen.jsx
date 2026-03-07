@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ImageBackground, StatusBar, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, ImageBackground, StatusBar, SafeAreaView, StyleSheet, TouchableOpacity, Pressable } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage"; 
 
 import { useNavigation } from "@react-navigation/native";
@@ -9,12 +9,11 @@ import { formatTime, getRandomQuote } from "../Constants/functions";
 import { NativeModules } from 'react-native';
 import { wallpapersObj } from "../Constants/wallpapers";
 import useSettingsStore from "../store/useSettingStore";
+import { handleBackgroundTap } from "../utils/doubleTap";
 
-const { InstalledApps } = NativeModules;
+const { InstalledApps, ScreenLock } = NativeModules;
 
-// ==========================================
-// NATIVE GRADIENT HACK (NO LIBRARY NEEDED)
-// ==========================================
+
 const GradientOverlay = ({ position }) => {
     const isTop = position === 'top';
     const layers = 20; // 20 strips for smooth blending
@@ -41,8 +40,7 @@ const GradientOverlay = ({ position }) => {
 
 export default function HomeScreen() {
     const [quote, setQuote] = useState(getRandomQuote());
-    const [defaultPhone, setDefaultPhone] = useState(null); 
-    
+    const [defaultPhone, setDefaultPhone] = useState(null);     
     const { selectedWallpaper, lcStats, lcUsername, showLCStats} = useSettingsStore(); 
     
     const navigation = useNavigation();
@@ -107,7 +105,7 @@ export default function HomeScreen() {
                 style={customStyles.background}
             >
                 <StatusBar barStyle="light-content" translucent={true} backgroundColor="transparent" />
-                
+                <Pressable style={StyleSheet.absoluteFill} onPress={() => handleBackgroundTap(ScreenLock)} />
                 {/* CUSTOM NO-LIBRARY GRADIENTS */}
                 <GradientOverlay position="top" />
                 <GradientOverlay position="bottom" />
