@@ -12,6 +12,33 @@ import useSettingsStore from "../store/useSettingStore";
 
 const { InstalledApps } = NativeModules;
 
+// ==========================================
+// NATIVE GRADIENT HACK (NO LIBRARY NEEDED)
+// ==========================================
+const GradientOverlay = ({ position }) => {
+    const isTop = position === 'top';
+    const layers = 20; // 20 strips for smooth blending
+    const stripHeight = isTop ? 15 : 10; // Top fade is 300px, Bottom fade is 200px
+
+    return (
+        <View style={[StyleSheet.absoluteFill, { justifyContent: isTop ? 'flex-start' : 'flex-end', zIndex: 0 }]} pointerEvents="none">
+            {[...Array(layers)].map((_, i) => {
+                const opacity = isTop 
+                    ? 0.7 * (1 - (i / (layers - 1))) 
+                    : 0.9 * (i / (layers - 1));
+                
+                return (
+                    <View 
+                        key={i} 
+                        style={{ height: stripHeight, width: '100%', backgroundColor: `rgba(0, 0, 0, ${opacity})` }} 
+                    />
+                );
+            })}
+        </View>
+    );
+};
+
+
 export default function HomeScreen() {
     const [quote, setQuote] = useState(getRandomQuote());
     const [defaultPhone, setDefaultPhone] = useState(null); 
@@ -81,8 +108,11 @@ export default function HomeScreen() {
             >
                 <StatusBar barStyle="light-content" translucent={true} backgroundColor="transparent" />
                 
+                {/* CUSTOM NO-LIBRARY GRADIENTS */}
+                <GradientOverlay position="top" />
+                <GradientOverlay position="bottom" />
+                
                 <View style={customStyles.contentWrapper}>
-                    {/* CHOTI CLOCK & QUOTE */}
                     <Text style={customStyles.timeText}>
                         {formatTime(currentTime)}
                     </Text>
@@ -90,7 +120,6 @@ export default function HomeScreen() {
                         {quote}
                     </Text>
 
-                    {/* AESTHETIC LC STATS PILL */}
                     {showLCStats && lcUsername && lcStats && (
                         <View style={customStyles.lcPillContainer}>
                             <View style={customStyles.statColumn}>
@@ -115,6 +144,7 @@ export default function HomeScreen() {
                     )}
                 </View>
 
+                {/* Floating Bottom Icons */}
                 <View style={customStyles.footerContainer}>
                     <TouchableOpacity 
                         style={customStyles.iconButton} 
@@ -146,7 +176,6 @@ const customStyles = StyleSheet.create({
         paddingTop: 50,
         paddingHorizontal: 20,
     },
-    // ---- CLOCK SIZE CHOTA KIYA ----
     timeText: {
         color: '#FFFFFF', 
         fontSize: 20,
@@ -168,7 +197,6 @@ const customStyles = StyleSheet.create({
         textShadowRadius: 5,
     },
     
-    // STATS PILL
     lcPillContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -212,6 +240,7 @@ const customStyles = StyleSheet.create({
         flexDirection: 'row', 
         justifyContent: 'space-between', 
         paddingHorizontal: 30,
+        zIndex: 1, // Icons fade ke upar rahein
     },
     iconButton: {
         padding: 10, 
