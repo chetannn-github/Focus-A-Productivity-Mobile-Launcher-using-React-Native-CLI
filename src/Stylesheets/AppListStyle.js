@@ -6,9 +6,11 @@ export const AppListstyle = StyleSheet.create({
     backgroundColor: 'black',
     paddingTop: 20,
     paddingHorizontal: 25,
+    paddingRight : 10,
     marginTop: 10,
   },
   appItem: {
+
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
