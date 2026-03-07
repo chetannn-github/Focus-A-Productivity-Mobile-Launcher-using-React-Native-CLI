@@ -51,7 +51,6 @@ export const SplashScreen = ({ onFinish }) => {
         const minWait = new Promise(resolve => setTimeout(resolve, 2500)); 
         
         const settingsPromise = loadSettings();
-        const fetchAppsPromise = fetchApps(shuffleApps);
         
         const checkPermsPromise = async () => {
           if (OverlayModule && ScreenLock) {
@@ -61,7 +60,8 @@ export const SplashScreen = ({ onFinish }) => {
           }
         };
 
-        await settingsPromise; 
+        await settingsPromise;
+        const fetchAppsPromise = fetchApps(shuffleApps, "INIT"); 
         await Promise.all([fetchAppsPromise, checkPermsPromise(), minWait]);
 
       } catch (error) {
