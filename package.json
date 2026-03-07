@@ -22,6 +22,7 @@
     "react-native-reanimated": "^3.16.7",
     "react-native-safe-area-context": "^5.1.0",
     "react-native-screens": "^4.5.0",
+    "react-native-svg": "^15.15.3",
     "react-native-vector-icons": "^10.2.0",
     "zustand": "^5.0.11"
   },

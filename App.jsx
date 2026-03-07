@@ -1,25 +1,30 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "react-native";
 import { MainNavigator } from "./src/Navigation/MainNavigator";
-import useSettingsStore from "./src/store/useSettingStore";
+import { SplashScreen } from "./src/Screens/SplashScreen";
 
 
 const App = () => {
-  const loadSettings = useSettingsStore((state) => state.loadSettings);
-
-  useEffect(() => {
-    loadSettings();
-  }, []);
+  const [isAppReady, setIsAppReady] = useState(false);
   
   return (
     <>
-      <StatusBar backgroundColor="black" barStyle="light-content" />
+      {!isAppReady ? (
+        <>
+        <StatusBar hidden = {true}/>
+        <SplashScreen onFinish={() => setIsAppReady(true)} />
+          </>
+      ) : (
         <NavigationContainer>
+        <StatusBar backgroundColor="black" barStyle="light-content" />
           <MainNavigator />
         </NavigationContainer>
+      )}
     </>
   );
 };
+
+
 
 export default App;

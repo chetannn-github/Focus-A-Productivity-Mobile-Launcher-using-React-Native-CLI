@@ -17,6 +17,9 @@ const useSettingsStore = create((set, get) => ({
   lcStats: { total: 0, easy: 0, medium: 0, hard: 0 },
   showLCStats: true,
 
+  perms: { overlay: null, admin: null },
+  setPerms: (newPerms) => set({ perms: newPerms }),
+
   loadSettings: async () => {
     try {
       const storedShowAppIcons = await AsyncStorage.getItem('showAppIcons');

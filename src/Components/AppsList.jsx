@@ -29,7 +29,6 @@ const AppsList = () => {
   };
 
   useEffect(() => {
-    fetchApps(shuffleApps);
     const subscription = installedAppsEmitter.addListener('appListUpdated', () => {
       fetchApps(shuffleApps);
     });
