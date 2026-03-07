@@ -55,6 +55,7 @@ const AppsList = () => {
             <FlashList
               ref={flatListRef}
               data={apps} 
+               drawDistance={2000} 
               keyExtractor={(item) => item.packageName}
               estimatedItemSize={ITEM_HEIGHT}
               showsVerticalScrollIndicator={false}
