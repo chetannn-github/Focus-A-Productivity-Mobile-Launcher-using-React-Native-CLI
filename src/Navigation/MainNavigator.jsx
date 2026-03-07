@@ -91,8 +91,15 @@ export const MainNavigator = () => {
             <View style={{ flex: 1 }}>
               <Text style={styles.permTitle}>Accessibility Service</Text>
               <Text style={styles.permDesc}>To lock screen without breaking fingerprint unlock.</Text>
+            
+              {!perms.admin && (
+                <Text style={{ color: '#FF9F0A', fontSize: 11, marginTop: 8, fontWeight: 'bold' }}>
+                   On next screen: Downloaded Apps &gt; Focus Launcher &gt; Turn On
+                </Text>
+              )}
             </View>
-            {perms.admin ? ( // perms.admin variable name same rakh sakte ho
+
+            {perms.admin ? ( 
               <Icon name="checkmark-circle" size={28} color="#30D158" />
             ) : (
               <TouchableOpacity style={styles.grantBtn} onPress={() => ScreenLock.requestPermission()}>
