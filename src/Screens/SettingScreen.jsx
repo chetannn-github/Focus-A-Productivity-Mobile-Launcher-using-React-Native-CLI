@@ -258,11 +258,13 @@ function SettingScreen() {
               <Text style={styles.switchLabel}>Lock Duration (minutes)</Text>
               <TextInput 
                 style={[styles.input, { marginTop: 4, marginBottom: 8, paddingVertical: 10 }]} 
-                keyboardType="numeric" 
+                keyboardType="number-pad"
                 placeholder="e.g. 30" 
                 placeholderTextColor="#636366"
                 value={newLockedTime}
-                onChangeText={setNewLockedTime}
+                // onChangeText={setNewLockedTime}
+                onChangeText={(text) => setNewLockedTime(text.replace(/[^0-9]/g, ''))}
+                maxLength={3}
               />
               <TouchableOpacity style={[styles.primaryBtn, { paddingVertical: 10 }]} onPress={onSaveLockTime}>
                 <Text style={styles.primaryBtnText}>Set Lock Time</Text>
