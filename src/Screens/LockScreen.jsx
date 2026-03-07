@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Pressable } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Pressable, StatusBar } from "react-native";
 import { motivationalQuotes } from "../Constants/quotes";
 import { styles } from "../Stylesheets/LockScreenStyle";
 import useSettingsStore from "../store/useSettingStore";
@@ -56,6 +56,7 @@ const LockScreen = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#000000" }}>
+      <StatusBar hidden/>
       <View style={[styles.container, { justifyContent: 'center', backgroundColor: '#000000' }]}>
        
         {!isLCLocked ? (
