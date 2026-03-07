@@ -110,13 +110,13 @@ const customStyles = StyleSheet.create({
         flex: 1, 
     },
     mainContent: {
-        paddingTop: 15,
+        paddingTop: 30,
         paddingHorizontal: 30,
         alignItems: 'center',
     },
     topHeader: {
         alignItems: 'center', 
-        marginBottom: 35,
+        marginBottom: 10,
     },
     quoteText: {
         color: 'rgba(255,255,255,0.6)', 
@@ -131,7 +131,7 @@ const customStyles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(255, 255, 255, 0.05)', // Almost transparent
-        paddingVertical: 10,
+        paddingVertical: 5,
         paddingHorizontal: 20,
         borderRadius: 50, 
     },
