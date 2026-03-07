@@ -11,11 +11,10 @@ export const langConfig = {
       startBrace: ":",
       endBrace: " ",
       terminator: "",
-      // CLI Dynamic Text
       cliPrompt: "$ ",
       cliCmd: "python3",
       cliArgs: " main.py --unlock",
-      cliColor: "#3776AB" // Python Blue
+      cliColor: "#3776AB" 
     },
     cpp: {
       fileName: "lock_protocol.cpp",
@@ -29,11 +28,10 @@ export const langConfig = {
       startBrace: " {",
       endBrace: "};",
       terminator: ";",
-      // CLI Dynamic Text
       cliPrompt: "# ",
       cliCmd: "./",
       cliArgs: "unlock_protocol",
-      cliColor: "#00599C" // C++ Blue
+      cliColor: "#00599C" 
     },
     java: {
       fileName: "LockProtocol.java",
@@ -47,11 +45,10 @@ export const langConfig = {
       startBrace: " {",
       endBrace: "}",
       terminator: ";",
-      // CLI Dynamic Text
       cliPrompt: "C:\\> ",
       cliCmd: "java",
       cliArgs: " LockProtocol --unlock",
-      cliColor: "#ED8B00" // Java Orange
+      cliColor: "#ED8B00" 
     },
     typescript: {
       fileName: "lock_protocol.ts",
@@ -65,10 +62,77 @@ export const langConfig = {
       startBrace: " {",
       endBrace: "};",
       terminator: ";",
-      // CLI Dynamic Text
       cliPrompt: "~ ",
       cliCmd: "npm run",
       cliArgs: " unlock",
-      cliColor: "#61AFEF" // TS Blue
+      cliColor: "#61AFEF" 
+    },
+    rust: {
+      fileName: "main.rs",
+      kw: "let ",
+      var: "is_locked",
+      op: " = ",
+      str: "true",
+      func: "require_solutions",
+      comment: "// ",
+      indent: "    ",
+      startBrace: " {",
+      endBrace: "}",
+      terminator: ";",
+      cliPrompt: "$ ",
+      cliCmd: "cargo",
+      cliArgs: " run --release",
+      cliColor: "#DEA584" // Rust Orange/Brown
+    },
+    go: {
+      fileName: "main.go",
+      kw: "var ",
+      var: "isLocked",
+      op: " = ",
+      str: "true",
+      func: "RequireSolutions",
+      comment: "// ",
+      indent: "	", // Go uses tabs
+      startBrace: " {",
+      endBrace: "}",
+      terminator: "",
+      cliPrompt: "$ ",
+      cliCmd: "go run",
+      cliArgs: " main.go",
+      cliColor: "#00ADD8" // Go Cyan
+    },
+    swift: {
+      fileName: "Lock.swift",
+      kw: "let ",
+      var: "isLocked",
+      op: " = ",
+      str: "true",
+      func: "requireSolutions",
+      comment: "// ",
+      indent: "    ",
+      startBrace: " {",
+      endBrace: "}",
+      terminator: "",
+      cliPrompt: "$ ",
+      cliCmd: "swift",
+      cliArgs: " run unlock",
+      cliColor: "#F05138" // Swift Orange
+    },
+    ruby: {
+      fileName: "lock.rb",
+      kw: "", // Ruby doesn't need kw for local vars
+      var: "is_locked",
+      op: " = ",
+      str: "true",
+      func: "require_solutions",
+      comment: "# ",
+      indent: "  ",
+      startBrace: "",
+      endBrace: "end",
+      terminator: "",
+      cliPrompt: "irb> ",
+      cliCmd: "ruby",
+      cliArgs: " lock.rb",
+      cliColor: "#CC342D" // Ruby Red
     }
-  };
+};

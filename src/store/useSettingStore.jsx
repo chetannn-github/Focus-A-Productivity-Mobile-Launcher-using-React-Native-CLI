@@ -19,6 +19,17 @@ const useSettingsStore = create((set, get) => ({
 
   perms: { overlay: null, admin: null },
   setPerms: (newPerms) => set({ perms: newPerms }),
+  favLanguage: 'python', 
+
+  setFavLanguage: async (lang) => {
+    const formattedLang = lang.toLowerCase();
+    set({ favLanguage: formattedLang });
+    try {
+      await AsyncStorage.setItem('favLanguage', formattedLang);
+    } catch (e) {
+      console.error("Failed to save language", e);
+    }
+  },
 
   loadSettings: async () => {
     try {
@@ -33,6 +44,7 @@ const useSettingsStore = create((set, get) => ({
       const storedLcStats = await AsyncStorage.getItem("lcStats");
       const storedShowLCStats = await AsyncStorage.getItem('showLCStats');
       const lockedUntil = storedLockedUntil ? Number(storedLockedUntil) : 0;
+      const storedFavLanguage = await AsyncStorage.getItem('favLanguage');
 
       set({
         showAppIcons: storedShowAppIcons !== null ? storedShowAppIcons === 'true' : true,
@@ -45,6 +57,7 @@ const useSettingsStore = create((set, get) => ({
         questionsToSolve: storedQuestionsToSolve ? Number(storedQuestionsToSolve) : 1, // Default to 1
         lcStats: storedLcStats ? JSON.parse(storedLcStats) : { total: 0, easy: 0, medium: 0, hard: 0 },
         showLCStats: storedShowLCStats !== null ? storedShowLCStats === 'true' : true,
+        favLanguage: storedFavLanguage || 'python',
       });
     } catch (e) {
       console.error("Error loading settings", e);

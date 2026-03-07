@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { 
   View, Text, TouchableOpacity, ActivityIndicator, Animated,
-  StyleSheet, Platform
+  StyleSheet, Platform, ScrollView // 🔥 ScrollView import kiya
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import useSettingsStore from "../../store/useSettingStore"; 
@@ -13,7 +13,17 @@ export const LeetCodeLockView = ({
 }) => {
   
   const favLanguage = useSettingsStore((state) => state.favLanguage) || "typescript";
-  const L =  langConfig[favLanguage];
+  const setFavLanguage = useSettingsStore((state) => state.setFavLanguage);
+  
+  const [showDropdown, setShowDropdown] = useState(false);
+  const L = langConfig[favLanguage];
+
+  const languages = Object.keys(langConfig);
+
+  const handleLangChange = (lang) => {
+    setFavLanguage(lang);
+    setShowDropdown(false);
+  };
 
   return (
     <View style={leetCodeStyles.centerBlock}>
@@ -26,8 +36,45 @@ export const LeetCodeLockView = ({
             <View style={[leetCodeStyles.macDot, { backgroundColor: '#FFBD2E' }]} />
             <View style={[leetCodeStyles.macDot, { backgroundColor: '#27C93F' }]} />
           </View>
+          
           <Text style={leetCodeStyles.fileName}>{L.fileName}</Text>
-          <Icon name="code-working-outline" size={16} color="#5C6370" />
+
+          
+          <View style={leetCodeStyles.dropdownContainer}>
+            <TouchableOpacity 
+              style={leetCodeStyles.selector} 
+              onPress={() => setShowDropdown(!showDropdown)}
+              activeOpacity={0.7}
+            >
+              <Text style={leetCodeStyles.selectorText}>{favLanguage.toUpperCase()}</Text>
+              <Icon name={showDropdown ? "chevron-up" : "chevron-down"} size={12} color="#5C6370" />
+            </TouchableOpacity>
+
+            {showDropdown && (
+              <View style={leetCodeStyles.dropdownMenu}>
+                <ScrollView 
+                  style={{ maxHeight: 160 }}
+                  nestedScrollEnabled={true} 
+                  showsVerticalScrollIndicator={false}
+                >
+                  {languages.map((lang) => (
+                    <TouchableOpacity 
+                      key={lang} 
+                      style={leetCodeStyles.menuItem} 
+                      onPress={() => handleLangChange(lang)}
+                    >
+                      <Text style={[
+                        leetCodeStyles.menuItemText, 
+                        favLanguage === lang && { color: '#61AFEF', fontWeight: 'bold' }
+                      ]}>
+                        {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+          </View>
         </View>
 
         <View style={leetCodeStyles.ideBody}>
@@ -95,7 +142,6 @@ export const LeetCodeLockView = ({
         </Text>
       </View>
 
-      {/* 🔥 DYNAMIC CLI BUTTON 🔥 */}
       <TouchableOpacity 
         style={[leetCodeStyles.cliButton, isChecking && { opacity: 0.5 }]} 
         onPress={onCheck}
@@ -118,11 +164,33 @@ export const LeetCodeLockView = ({
 
 const leetCodeStyles = StyleSheet.create({
   centerBlock: { alignItems: 'center', width: '100%', marginTop: 20 },
-  ideWindow: { width: '100%', backgroundColor: '#0D1117', borderRadius: 12, borderWidth: 1, borderColor: '#30363D', overflow: 'hidden', marginTop: 30, elevation: 10, shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 15 },
-  ideHeader: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#161B22', paddingVertical: 10, paddingHorizontal: 15, borderBottomWidth: 1, borderBottomColor: '#30363D' },
+  ideWindow: { width: '100%', backgroundColor: '#0D1117', borderRadius: 12, borderWidth: 1, borderColor: '#30363D', overflow: 'hidden', marginTop: 30, elevation: 10, shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 15, zIndex: 1 },
+  ideHeader: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#161B22', paddingVertical: 8, paddingHorizontal: 15, borderBottomWidth: 1, borderBottomColor: '#30363D', position: 'relative', overflow: 'visible' },
   macDots: { flexDirection: 'row', marginRight: 15 },
   macDot: { width: 10, height: 10, borderRadius: 5, marginRight: 6 },
-  fileName: { flex: 1, color: '#8B949E', fontSize: 12, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', textAlign: 'center', marginRight: 15 },
+  fileName: { flex: 1, color: '#8B949E', fontSize: 11, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', textAlign: 'center' },
+  
+  dropdownContainer: { position: 'relative' },
+  selector: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0D1117', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4, borderWidth: 0.5, borderColor: '#30363D' },
+  selectorText: { color: '#5C6370', fontSize: 10, fontFamily: 'monospace', fontWeight: 'bold', marginRight: 4 },
+  
+  
+  dropdownMenu: { 
+    position: 'absolute', 
+    top: 30, 
+    right: 0, 
+    backgroundColor: '#161B22', 
+    borderRadius: 8, 
+    borderWidth: 1, 
+    borderColor: '#30363D', 
+    width: 120, 
+    elevation: 10, 
+    zIndex: 1000,
+    overflow: 'hidden' 
+  },
+  menuItem: { paddingVertical: 10, paddingHorizontal: 14, borderBottomWidth: 0.5, borderBottomColor: '#21262D' },
+  menuItemText: { color: '#ABB2BF', fontSize: 11, fontFamily: 'monospace' },
+
   ideBody: { paddingVertical: 15, paddingHorizontal: 10 },
   codeRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
   lineNumber: { color: '#495162', fontSize: 13, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace', width: 25, textAlign: 'right', marginRight: 15 },
