@@ -87,6 +87,17 @@ function SettingScreen() {
     }
   };
 
+  const onSaveLockTime =  () => {
+    const success = handleLockedTimeChange();
+    if (success === false) {
+      showAlert(
+        "Invalid Duration", 
+        "Please enter a value between 1 and 120 minutes. Durations exceeding 2 hours are not supported.", 
+        "Got it"
+      );
+    }
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: "#000" }}>
       <SafeAreaView style={[styles.SettingScreen, { paddingBottom: 0 }]}>
@@ -253,7 +264,7 @@ function SettingScreen() {
                 value={newLockedTime}
                 onChangeText={setNewLockedTime}
               />
-              <TouchableOpacity style={[styles.primaryBtn, { paddingVertical: 10 }]} onPress={handleLockedTimeChange}>
+              <TouchableOpacity style={[styles.primaryBtn, { paddingVertical: 10 }]} onPress={onSaveLockTime}>
                 <Text style={styles.primaryBtnText}>Set Lock Time</Text>
               </TouchableOpacity>
             </Animated.View>

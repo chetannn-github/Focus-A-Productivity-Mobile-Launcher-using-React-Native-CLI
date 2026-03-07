@@ -32,9 +32,10 @@ function useSetting() {
 
     const handleLockedTimeChange = () => {
         const time = parseInt(newLockedTime, 10);
-        if (!isNaN(time) && time >= 0) {
+        if (!isNaN(time) && time >= 0 && time <= 120) {
           lockForMinutes(time);
-        }
+          return true
+        }else return false;
     }
 
     // MASTER TOGGLE FUNCTION
