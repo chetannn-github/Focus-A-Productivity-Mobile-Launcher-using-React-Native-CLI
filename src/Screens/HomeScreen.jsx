@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ImageBackground, StatusBar, SafeAreaView, StyleSheet } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Added AsyncStorage
+import { View, Text, ImageBackground, StatusBar, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage"; 
 
 import { useNavigation } from "@react-navigation/native";
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -14,18 +14,17 @@ const { InstalledApps } = NativeModules;
 
 export default function HomeScreen() {
     const [quote, setQuote] = useState(getRandomQuote());
-    const [defaultPhone, setDefaultPhone] = useState(null); // Local state for phone package
+    const [defaultPhone, setDefaultPhone] = useState(null); 
     
     const { selectedWallpaper, lcStats, lcUsername, showLCStats} = useSettingsStore(); 
     
     const navigation = useNavigation();
     const wallpaperURI = parseInt(selectedWallpaper) + 1;
-    const wallpaperURIString = wallpapersObj["wallpaper"+wallpaperURI+""];
+    const wallpaperURIString = wallpapersObj["wallpaper"+wallpaperURI];
 
     useEffect(() => {
         const initPhoneApp = async () => {
             try {
-               
                 const storedPhone = await AsyncStorage.getItem("defaultPhoneApp");
                 if (storedPhone) {
                     setDefaultPhone(storedPhone);
@@ -55,7 +54,6 @@ export default function HomeScreen() {
             console.error("Error opening phone app:", error);
         }
     };
-    // ----------------------------------
     
     useEffect(() => { 
         let id = setInterval(() => {
@@ -65,7 +63,6 @@ export default function HomeScreen() {
         return () => clearInterval(id);
     }, []);
 
-    // Time state
     const [currentTime, setCurrentTime] = useState(new Date());
 
     useEffect(() => {
@@ -76,46 +73,64 @@ export default function HomeScreen() {
     }, []);
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>
             <ImageBackground 
                 source={selectedWallpaper ? wallpaperURIString : require("../assets/wallpapers/wallpaper1.jpg")}  
                 resizeMode="cover"
-                style={{ flex:1, backgroundColor: 'black', paddingTop:50 ,paddingHorizontal:15,flexDirection:"column",justifyContent:"flex-start",alignContent:"flex-start"}}
+                style={customStyles.background}
             >
-                <StatusBar 
-                    barStyle="light-content" 
-                    translucent={true} 
-                    backgroundColor="transparent" 
-                />
+                <StatusBar barStyle="light-content" translucent={true} backgroundColor="transparent" />
                 
-                <Text style={{ color: 'white', fontSize: 20, fontWeight: '500', marginBottom: 5 }}>
-                    {formatTime(currentTime)}
-                </Text>
-                
-                <Text style={{ color: 'white', fontSize: 16, marginBottom: 15, opacity: 0.9 }}>
-                    {quote}
-                </Text>
+                <View style={customStyles.contentWrapper}>
+                    {/* CHOTI CLOCK & QUOTE */}
+                    <Text style={customStyles.timeText}>
+                        {formatTime(currentTime)}
+                    </Text>
+                    <Text style={customStyles.quoteText}>
+                        {quote}
+                    </Text>
 
-                {showLCStats && lcUsername && lcStats && (
-                    <View style={customStyles.statsWrapper}>
-                        <View style={customStyles.statBox}>
-                            <Text style={[customStyles.statDot, { color: '#00b8a3' }]}>E</Text>
-                            <Text style={customStyles.statValue}>{lcStats.easy || 0}</Text>
+                    {/* AESTHETIC LC STATS PILL */}
+                    {showLCStats && lcUsername && lcStats && (
+                        <View style={customStyles.lcPillContainer}>
+                            <View style={customStyles.statColumn}>
+                                <Text style={[customStyles.statLabel, { color: '#00b8a3' }]}>EASY</Text>
+                                <Text style={customStyles.statValue}>{lcStats.easy || 0}</Text>
+                            </View>
+                            
+                            <View style={customStyles.divider} />
+                            
+                            <View style={customStyles.statColumn}>
+                                <Text style={[customStyles.statLabel, { color: '#ffc01e' }]}>MED</Text>
+                                <Text style={customStyles.statValue}>{lcStats.medium || 0}</Text>
+                            </View>
+                            
+                            <View style={customStyles.divider} />
+                            
+                            <View style={customStyles.statColumn}>
+                                <Text style={[customStyles.statLabel, { color: '#ff375f' }]}>HARD</Text>
+                                <Text style={customStyles.statValue}>{lcStats.hard || 0}</Text>
+                            </View>
                         </View>
-                        <View style={customStyles.statBox}>
-                            <Text style={[customStyles.statDot, { color: '#ffc01e' }]}>M</Text>
-                            <Text style={customStyles.statValue}>{lcStats.medium || 0}</Text>
-                        </View>
-                        <View style={customStyles.statBox}>
-                            <Text style={[customStyles.statDot, { color: '#ff375f' }]}>H</Text>
-                            <Text style={customStyles.statValue}>{lcStats.hard || 0}</Text>
-                        </View>
-                    </View>
-                )}
+                    )}
+                </View>
 
-                <View style={{ position: 'absolute', bottom: 20, left: 0, right: 0, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 }}>
-                    <Icon name="more-horiz" size={30} color="white" onPress={() => navigation.openDrawer()} />
-                    <Icon name="phone" size={30} color="white" onPress={openPhoneApp} />
+                <View style={customStyles.footerContainer}>
+                    <TouchableOpacity 
+                        style={customStyles.iconButton} 
+                        onPress={() => navigation.openDrawer()}
+                        activeOpacity={0.6}
+                    >
+                        <Icon name="more-horiz" size={32} color="#FFF" style={customStyles.iconShadow} />
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                        style={customStyles.iconButton} 
+                        onPress={openPhoneApp}
+                        activeOpacity={0.6}
+                    >
+                        <Icon name="phone" size={28} color="#FFF" style={customStyles.iconShadow} />
+                    </TouchableOpacity>
                 </View>
             </ImageBackground>
         </SafeAreaView>
@@ -123,29 +138,87 @@ export default function HomeScreen() {
 }
 
 const customStyles = StyleSheet.create({
-    statsWrapper: {
-        flexDirection: 'row',
-        backgroundColor: 'rgba(0, 0, 0, 0.4)', 
-        alignSelf: 'flex-start',
-        paddingVertical: 8,
-        paddingHorizontal: 14,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)', 
-        gap: 15,
+    background: {
+        flex: 1, 
+        backgroundColor: '#000', 
     },
-    statBox: {
+    contentWrapper: {
+        paddingTop: 50,
+        paddingHorizontal: 20,
+    },
+    // ---- CLOCK SIZE CHOTA KIYA ----
+    timeText: {
+        color: '#FFFFFF', 
+        fontSize: 20,
+        fontWeight: '500', 
+        letterSpacing: 1.5,
+        textShadowColor: 'rgba(0, 0, 0, 0.6)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 5,
+    },
+    quoteText: {
+        color: '#FFFFFF', 
+        fontSize: 14, 
+        fontWeight: '400',
+        opacity: 1,
+        marginTop: 3,
+        lineHeight: 22,
+        textShadowColor: 'rgba(0, 0, 0, 0.8)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 5,
+    },
+    
+    // STATS PILL
+    lcPillContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 5,
+        justifyContent: 'space-between',
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        borderRadius: 16,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        marginTop: 25,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)', 
+        width: '80%', 
     },
-    statDot: {
-        fontSize: 14,
-        fontWeight: 'bold',
+    statColumn: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: 1,
+    },
+    statLabel: {
+        fontSize: 10,
+        fontWeight: '800',
+        letterSpacing: 1,
+        marginBottom: 2,
     },
     statValue: {
-        color: '#FFFFFF',
-        fontSize: 14,
-        fontWeight: '600',
+        color: '#FFF',
+        fontSize: 18,
+        fontWeight: '400',
+    },
+    divider: {
+        width: 1,
+        height: '70%',
+        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    },
+
+    footerContainer: {
+        position: 'absolute', 
+        bottom: 30, 
+        left: 0, 
+        right: 0, 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        paddingHorizontal: 30,
+    },
+    iconButton: {
+        padding: 10, 
+    },
+    iconShadow: {
+        textShadowColor: 'rgba(0, 0, 0, 0.5)',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 5,
     }
 });
